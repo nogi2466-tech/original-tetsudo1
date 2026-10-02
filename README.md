@@ -199,15 +199,11 @@
             <h2 class="text-xl font-bold text-indigo-200">システム設定 & クラウド同期</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-xl space-y-4">
                 <p class="text-xs text-slate-300">
-                    Firebase Realtime Database の設定情報を入力すると、複数のデバイス間でのリアルタイム自動同期が有効になります。
+                    Firebase Realtime Database のURLを入力すると、複数のデバイス間でのリアルタイム自動同期が有効になります。
                 </p>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Firebase Database URL</label>
-                    <input type="text" id="fb-url" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" placeholder="https://your-app-default-rtdb.firebaseio.com">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">API Key</label>
-                    <input type="text" id="fb-key" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" placeholder="AIzaSy...">
+                    <input type="text" id="fb-url" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="https://original-tetsudo-430ac-default-rtdb.firebaseio.com">
                 </div>
                 <button onclick="saveFirebaseConfig()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition shadow">クラウド接続を保存・開始</button>
                 <hr class="border-slate-700 my-2">
@@ -252,12 +248,11 @@
         // Firebase接続開始
         function saveFirebaseConfig() {
             const url = document.getElementById('fb-url').value.trim();
-            const apiKey = document.getElementById('fb-key').value.trim();
             if(!url) { alert("Database URLを入力してください"); return; }
             
             try {
                 if(firebase.apps.length === 0) {
-                    firebase.initializeApp({ databaseURL: url, apiKey: apiKey });
+                    firebase.initializeApp({ databaseURL: url });
                 }
                 dbRef = firebase.database().ref('shinomori_railway');
                 dbRef.on('value', (snapshot) => {
@@ -272,7 +267,6 @@
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
                 document.getElementById('sync-status-text').innerText = "クラウド同期: 接続中 (リアルタイム)";
                 localStorage.setItem('shinomori_fb_url', url);
-                localStorage.setItem('shinomori_fb_key', apiKey);
                 alert("クラウド同期接続に成功しました！");
             } catch(e) {
                 alert("接続エラー: " + e.message);
@@ -288,7 +282,6 @@
         }
 
         function updateUI() {
-            // 運行状況更新
             const container = document.getElementById('train-list-status');
             if(container) {
                 container.innerHTML = appData.trains.map(t => `
@@ -318,7 +311,7 @@
             switchTab('operation');
         }
 
-        // 車両情報図鑑レンダリング
+        // 車両情報図鑑
         function renderTrainInfo() {
             const grid = document.getElementById('train-info-grid');
             if(!grid) return;
@@ -339,7 +332,7 @@
             `).join('');
         }
 
-        // 編成表レンダリング
+        // 編成表
         function renderConsist() {
             const list = document.getElementById('consist-list');
             if(!list) return;
@@ -365,7 +358,6 @@
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // グリッド線
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1;
             for(let i=0; i<canvas.width; i+=50) {
@@ -375,7 +367,6 @@
                 ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
             }
 
-            // サンプルスジ（列車運行線）
             ctx.strokeStyle = '#f43f5e';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -412,7 +403,7 @@
             `;
         }
 
-        // 簡易運転シミュレーター制御
+        // 運転シミュレーター制御
         let speed = 0;
         function cabAccel() { if(speed < 130) speed += 10; updateCab(); }
         function cabBrake() { if(speed > 0) speed -= 15; if(speed < 0) speed = 0; updateCab(); }
@@ -450,17 +441,9 @@
 
         // 初期化
         window.onload = function() {
-            const savedUrl = localStorage.getItem('shinomori_fb_url');
-            const savedKey = localStorage.getItem('shinomori_fb_key');
-            if(savedUrl) {
-                document.getElementById('fb-url').value = savedUrl;
-                document.getElementById('fb-key').value = savedKey || '';
-                saveFirebaseConfig();
-            } else {
-                const local = localStorage.getItem('shinomori_local');
-                if(local) appData = JSON.parse(local);
-                updateUI();
-            }
+            const savedUrl = localStorage.getItem('shinomori_fb_url') || "https://original-tetsudo-430ac-default-rtdb.firebaseio.com";
+            document.getElementById('fb-url').value = savedUrl;
+            saveFirebaseConfig();
         };
     </script>
 </body>
