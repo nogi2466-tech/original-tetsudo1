@@ -177,26 +177,49 @@
             </div>
         </div>
 
-        <!-- 4. 列車情報 -->
+        <!-- 4. 列車情報（テーブル一覧） -->
         <div id="tab-traininfo" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">車両形式図鑑</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="train-info-grid">
-                <!-- 動的生成 -->
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold text-indigo-200">列車情報一覧（リアルタイムステータス）</h2>
+                <button onclick="switchTab('addtrain')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs font-medium transition shadow">+ 新規列車追加へ</button>
+            </div>
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto shadow-xl">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-indigo-300 text-xs bg-slate-900/60">
+                            <th class="p-3">列車番号</th>
+                            <th class="p-3">運用番号</th>
+                            <th class="p-3">種別</th>
+                            <th class="p-3">行き先</th>
+                            <th class="p-3">両数</th>
+                            <th class="p-3">状態</th>
+                            <th class="p-3">編成 / 詳細</th>
+                        </tr>
+                    </thead>
+                    <tbody id="train-table-body" class="text-sm text-slate-200 divide-y divide-slate-700/50">
+                        <!-- 動的生成 -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- 5. 列車追加 -->
+        <!-- 5. 列車追加（詳細設定フォーム） -->
         <div id="tab-addtrain" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加</h2>
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-xl space-y-4">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">列車番号 / 運用名</label>
-                    <input type="text" id="add-train-name" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="特急 101M">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
+            <h2 class="text-xl font-bold text-indigo-200">新規列車運用・詳細設定追加</h2>
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5 shadow-xl">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">列車番号</label>
+                        <input type="text" id="add-train-num" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="101M">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">運用番号</label>
+                        <input type="text" id="add-op-num" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="A01">
+                    </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">種別</label>
-                        <select id="add-train-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                        <select id="add-train-type" onchange="onRouteOrTypeChanged()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
                             <option>特急</option>
                             <option>通勤急行</option>
                             <option>急行</option>
@@ -206,9 +229,36 @@
                             <option>普通</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">車両形式</label>
-                        <select id="add-train-series" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                        <label class="block text-xs text-slate-400 mb-1">配属路線</label>
+                        <select id="add-train-line" onchange="updateStationDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="main">紫雲本線</option>
+                            <option value="branch">句守支線</option>
+                            <option value="sight">紫霞観光線</option>
+                            <option value="plateau">星句高原線</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">始点駅</label>
+                        <select id="add-start-station" onchange="onRouteOrTypeChanged()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <!-- 動的 -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">終点駅（行き先）</label>
+                        <select id="add-end-station" onchange="onRouteOrTypeChanged()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <!-- 動的 -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">列車編成（車両形式）</label>
+                        <select id="add-series-1" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
                             <option>S100系 (特急型)</option>
                             <option>S1系</option>
                             <option>S2系</option>
@@ -218,25 +268,66 @@
                             <option>S900系 (事業用)</option>
                         </select>
                     </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">配属路線</label>
-                        <select id="add-train-line" onchange="updateAddStationDropdown()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option value="main">紫雲本線</option>
-                            <option value="branch">句守支線</option>
-                            <option value="sight">紫霞観光線</option>
-                            <option value="plateau">星句高原線</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">現在駅</label>
-                        <select id="add-train-station-id" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <!-- 動的生成 -->
+                        <label class="block text-xs text-slate-400 mb-1">両数</label>
+                        <select id="add-cars" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="10">10両編成</option>
+                            <option value="8">8両編成</option>
+                            <option value="6">6両編成</option>
+                            <option value="4">4両編成</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="addNewTrain()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition shadow">運行リストに追加 (クラウド自動同期)</button>
+
+                <!-- 連結編成設定 -->
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="add-coupled-check" onchange="toggleCoupledSection()" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                        <span class="text-sm font-bold text-indigo-300">連結編成にする（2編成併結）</span>
+                    </label>
+                    <div id="coupled-section-container" class="hidden pt-2">
+                        <label class="block text-xs text-slate-400 mb-1">2編成目の車両形式</label>
+                        <select id="add-series-2" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option>S1系</option>
+                            <option>S2系</option>
+                            <option>S3系</option>
+                            <option>S4系</option>
+                            <option>S5系</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 特殊作業・変更設定 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">併結・分割作業設定</label>
+                        <select id="add-coupling-work" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="none">なし</option>
+                            <option value="couple">途中で増結（併結）あり</option>
+                            <option value="split">途中で切り離し（分割）あり</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">種別変更設定</label>
+                        <select id="add-type-change" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="none">なし（変更なし）</option>
+                            <option value="to-local">途中で「普通」に種別変更</option>
+                            <option value="to-express">途中で「特急」に種別変更</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 停車駅・時刻設定連動セクション -->
+                <div class="space-y-2 border-t border-slate-700 pt-4">
+                    <h3 class="text-sm font-bold text-indigo-300">区間停車駅ごとの到着・発車時刻設定</h3>
+                    <p class="text-xs text-slate-400">始点と終点、種別を選択すると区間内の停車駅が自動表示されます。各駅の時刻を設定してください。</p>
+                    
+                    <div id="stops-time-container" class="space-y-2 max-h-60 overflow-y-auto pr-2 bg-slate-900 p-3 rounded-lg border border-slate-700">
+                        <!-- 動的生成 -->
+                    </div>
+                </div>
+
+                <button onclick="addNewTrain()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition shadow-lg text-base">新規列車を登録する (クラウド自動同期)</button>
             </div>
         </div>
 
@@ -348,7 +439,6 @@
                 targetBtn.classList.add('bg-indigo-600', 'text-white', 'shadow');
                 targetBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
             }
-            // スマホメニューが開いていれば閉じる
             const menu = document.getElementById('nav-menu');
             if(menu.classList.contains('absolute')) {
                 toggleMenu();
@@ -357,6 +447,8 @@
             if (tabId === 'dia') drawDiagram();
             if (tabId === 'operation') renderRouteMap();
             if (tabId === 'timetable') initTimetableDropdowns();
+            if (tabId === 'traininfo') renderTrainTable();
+            if (tabId === 'addtrain') updateStationDropdowns();
         }
 
         // 路線切り替え（走行位置ページ内）
@@ -375,9 +467,24 @@
         // 基本データ
         let appData = {
             trains: [
-                { id: 1, name: "特急 101M", type: "特急", series: "S100系", line: "main", stationId: "01", direction: "down" },
-                { id: 2, name: "普通 402C", type: "普通", series: "S3系", line: "main", stationId: "13", direction: "up" },
-                { id: 3, name: "快速 205M", type: "快速", series: "S2系", line: "main", stationId: "30", direction: "down" }
+                { 
+                    id: 1, trainNum: "101M", opNum: "A01", type: "特急", series1: "S100系 (特急型)", cars: "10", 
+                    line: "main", startSt: "01", endSt: "30", endName: "紫句守展示場", status: "走行中", 
+                    isCoupled: false, series2: "", couplingWork: "none", typeChange: "none",
+                    stationId: "12", direction: "down" 
+                },
+                { 
+                    id: 2, trainNum: "402C", opNum: "B12", type: "普通", series1: "S3系", cars: "6", 
+                    line: "main", startSt: "30", endSt: "01", endName: "紫句守中央", status: "停車中", 
+                    isCoupled: false, series2: "", couplingWork: "none", typeChange: "none",
+                    stationId: "13", direction: "up" 
+                },
+                { 
+                    id: 3, trainNum: "205M", opNum: "C04", type: "快速", series1: "S2系", cars: "8", 
+                    line: "main", startSt: "01", endSt: "30", endName: "紫句守展示場", status: "運行前", 
+                    isCoupled: true, series2: "S1系", couplingWork: "couple", typeChange: "none",
+                    stationId: "01", direction: "down" 
+                }
             ]
         };
 
@@ -417,6 +524,7 @@
 
         function updateUI() {
             renderRouteMap();
+            renderTrainTable();
             renderTrainInfo();
             renderConsist();
             initTimetableDropdowns();
@@ -432,31 +540,26 @@
             titleBanner.innerText = `${lineInfo.name} 運行モニター（全${lineInfo.stations.length}駅）`;
 
             container.innerHTML = lineInfo.stations.map((st) => {
-                // この駅にいる下り列車
                 const downTrains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id && t.direction === 'down');
-                // この駅にいる上り列車
                 const upTrains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id && t.direction === 'up');
 
                 return `
                     <div class="relative flex items-center justify-between">
-                        <!-- 左側：上り列車エリア -->
                         <div class="w-5/12 pr-4 text-right space-y-1">
                             ${upTrains.map(t => `
                                 <div class="inline-block bg-slate-900 border border-sky-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
-                                    <span class="font-bold text-sky-300">${t.name}</span>
-                                    <span class="text-[10px] text-slate-400 block">${t.series}</span>
+                                    <span class="font-bold text-sky-300">${t.trainNum} (${t.type})</span>
+                                    <span class="text-[10px] text-slate-400 block">${t.series1}</span>
                                 </div>
                             `).join('')}
                         </div>
 
-                        <!-- 中央：駅ノード -->
                         <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
                             <div class="w-6 h-6 rounded-full bg-slate-900 border-4 border-indigo-500 shadow flex items-center justify-center z-20">
                                 <div class="w-2 h-2 rounded-full bg-white"></div>
                             </div>
                         </div>
 
-                        <!-- 右側：駅名 ＆ 下り列車エリア -->
                         <div class="w-5/12 pl-6 space-y-2">
                             <div class="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-lg shadow">
                                 <span class="font-bold text-indigo-200 text-sm block">${st.id}. ${st.name}</span>
@@ -467,8 +570,8 @@
                             <div class="space-y-1">
                                 ${downTrains.map(t => `
                                     <div class="inline-block bg-slate-900 border border-rose-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
-                                        <span class="font-bold text-rose-300">${t.name}</span>
-                                        <span class="text-[10px] text-slate-400 block">${t.series}</span>
+                                        <span class="font-bold text-rose-300">${t.trainNum} (${t.type})</span>
+                                        <span class="text-[10px] text-slate-400 block">${t.series1}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -478,35 +581,169 @@
             }).join('');
         }
 
-        // 列車追加時の駅ドロップダウン連動
-        function updateAddStationDropdown() {
-            const lineKey = document.getElementById('add-train-line').value;
-            const stSelect = document.getElementById('add-train-station-id');
-            const stations = linesData[lineKey].stations;
-            stSelect.innerHTML = stations.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
+        // 列車情報テーブル表示
+        function renderTrainTable() {
+            const tbody = document.getElementById('train-table-body');
+            if(!tbody) return;
+
+            if(!appData.trains || appData.trains.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">登録されている列車はありません。「列車追加」から登録してください。</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = appData.trains.map(t => {
+                let statusBadge = "";
+                switch(t.status) {
+                    case "走行中": statusBadge = "bg-emerald-950 text-emerald-300 border-emerald-700 animate-pulse"; break;
+                    case "停車中": statusBadge = "bg-amber-950 text-amber-300 border-amber-700"; break;
+                    case "運行準備中": statusBadge = "bg-indigo-950 text-indigo-300 border-indigo-700"; break;
+                    case "運行前": statusBadge = "bg-slate-800 text-slate-300 border-slate-600"; break;
+                    case "運行終了": statusBadge = "bg-slate-900 text-slate-400 border-slate-700"; break;
+                    default: statusBadge = "bg-rose-950 text-rose-300 border-rose-700";
+                }
+
+                const lineObj = linesData[t.line];
+                const lineName = lineObj ? lineObj.name : "不明路線";
+                const stObj = lineObj ? lineObj.stations.find(s => s.id === t.stationId) : null;
+                const currentLocStr = stObj ? stObj.name : t.stationId;
+
+                return `
+                    <tr class="border-b border-slate-800 hover:bg-slate-900/40 transition">
+                        <td class="p-3 font-mono font-bold text-indigo-300">${t.trainNum}</td>
+                        <td class="p-3 font-mono text-slate-300">${t.opNum}</td>
+                        <td class="p-3"><span class="bg-indigo-900/60 text-indigo-200 px-2 py-0.5 rounded text-xs border border-indigo-700">${t.type}</span></td>
+                        <td class="p-3">${t.endName || '未設定'}</td>
+                        <td class="p-3">${t.cars}両</td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full text-xs border ${statusBadge}">${t.status}</span>
+                            <span class="text-[10px] text-slate-400 block mt-1">現在: ${currentLocStr}</span>
+                        </td>
+                        <td class="p-3 text-xs text-slate-400">
+                            <div>編成: ${t.series1} ${t.isCoupled ? `+ ${t.series2}` : ''}</div>
+                            <div>路線: ${lineName}</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        // 新規列車追加
+        // 列車追加フォームの駅ドロップダウン連動 ＆ 停車駅時刻表自動生成
+        function updateStationDropdowns() {
+            const lineKey = document.getElementById('add-train-line').value;
+            const startSel = document.getElementById('add-start-station');
+            const endSel = document.getElementById('add-end-station');
+            const stations = linesData[lineKey].stations;
+
+            const optionsHtml = stations.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
+            startSel.innerHTML = optionsHtml;
+            endSel.innerHTML = optionsHtml;
+
+            if(stations.length > 1) {
+                endSel.selectedIndex = stations.length - 1;
+            }
+            onRouteOrTypeChanged();
+        }
+
+        // 連結編成チェックボックス切替
+        function toggleCoupledSection() {
+            const isChecked = document.getElementById('add-coupled-check').checked;
+            const container = document.getElementById('coupled-section-container');
+            if(isChecked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // 種別・始点・終点が変更されたときの停車駅一覧の動的生成
+        function onRouteOrTypeChanged() {
+            const lineKey = document.getElementById('add-train-line').value;
+            const startId = document.getElementById('add-start-station').value;
+            const endId = document.getElementById('add-end-station').value;
+            const stopsContainer = document.getElementById('stops-time-container');
+            const stations = linesData[lineKey].stations;
+
+            const startIndex = stations.findIndex(s => s.id === startId);
+            const endIndex = stations.findIndex(s => s.id === endId);
+
+            if(startIndex === -1 || endIndex === -1) {
+                stopsContainer.innerHTML = `<p class="text-xs text-slate-400">有効な始点駅と終点駅を選択してください。</p>`;
+                return;
+            }
+
+            const step = startIndex <= endIndex ? 1 : -1;
+            let activeStops = [];
+            for(let i = startIndex; ; i += step) {
+                activeStops.push(stations[i]);
+                if(i === endIndex) break;
+            }
+
+            stopsContainer.innerHTML = activeStops.map((st, idx) => {
+                const defaultArr = `08:${String(10 + idx * 5).padStart(2, '0')}`;
+                const defaultDep = `08:${String(12 + idx * 5).padStart(2, '0')}`;
+                return `
+                    <div class="flex items-center justify-between bg-slate-800 p-2 rounded border border-slate-700 text-xs gap-2">
+                        <div class="font-bold text-indigo-200 w-1/3">${st.id}. ${st.name}</div>
+                        <div class="flex items-center gap-1 w-2/3 justify-end">
+                            <span class="text-slate-400">着</span>
+                            <input type="time" value="${defaultArr}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs font-mono stop-arr" data-stid="${st.id}">
+                            <span class="text-slate-400 ml-2">発</span>
+                            <input type="time" value="${defaultDep}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs font-mono stop-dep" data-stid="${st.id}">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 新規列車登録処理
         function addNewTrain() {
-            const name = document.getElementById('add-train-name').value;
+            const trainNum = document.getElementById('add-train-num').value.trim();
+            const opNum = document.getElementById('add-op-num').value.trim();
             const type = document.getElementById('add-train-type').value;
-            const series = document.getElementById('add-train-series').value;
             const line = document.getElementById('add-train-line').value;
-            const stationId = document.getElementById('add-train-station-id').value;
-            
-            appData.trains.push({ 
-                id: Date.now(), 
-                name, 
-                type, 
-                series, 
+            const startSt = document.getElementById('add-start-station').value;
+            const endSt = document.getElementById('add-end-station').value;
+            const series1 = document.getElementById('add-series-1').value;
+            const cars = document.getElementById('add-cars').value;
+            const isCoupled = document.getElementById('add-coupled-check').checked;
+            const series2 = isCoupled ? document.getElementById('add-series-2').value : "";
+            const couplingWork = document.getElementById('add-coupling-work').value;
+            const typeChange = document.getElementById('add-type-change').value;
+
+            if(!trainNum) {
+                alert("列車番号を入力してください。");
+                return;
+            }
+
+            const lineObj = linesData[line];
+            const endStObj = lineObj.stations.find(s => s.id === endSt);
+            const endName = endStObj ? endStObj.name : "終点";
+
+            const newTrain = {
+                id: Date.now(),
+                trainNum,
+                opNum,
+                type,
+                series1,
+                cars,
                 line,
-                stationId, 
-                direction: Math.random() > 0.5 ? 'down' : 'up' 
-            });
+                startSt,
+                endSt,
+                endName,
+                status: "運行前",
+                isCoupled,
+                series2,
+                couplingWork,
+                typeChange,
+                stationId: startSt,
+                direction: startSt <= endSt ? "down" : "up"
+            };
+
+            appData.trains.push(newTrain);
             pushData();
             updateUI();
-            alert("新規列車を追加し、運行マップに同期しました！");
-            switchTab('operation');
+            alert("新規列車を詳細設定付きで登録し、クラウド同期しました！");
+            switchTab('traininfo');
         }
 
         // 時刻表用の駅ドロップダウン初期化
@@ -647,7 +884,7 @@
         // 初期化実行
         window.onload = function() {
             initFirebase();
-            updateAddStationDropdown();
+            updateStationDropdowns();
             initTimetableDropdowns();
             setInterval(updateLiveDateTime, 1000);
             updateLiveDateTime();
