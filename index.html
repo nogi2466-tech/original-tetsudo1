@@ -28,7 +28,7 @@
         </div>
         <div class="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
             <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-            <span id="sync-status-text">クラウド同期: 未設定 (設定タブで接続)</span>
+            <span id="sync-status-text">クラウド同期: 接続待機中...</span>
         </div>
     </header>
 
@@ -174,7 +174,7 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="addNewTrain()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition shadow">運行リストに追加 (クラウド保存)</button>
+                <button onclick="addNewTrain()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition shadow">運行リストに追加 (クラウド自動同期)</button>
             </div>
         </div>
 
@@ -196,21 +196,14 @@
 
         <!-- 8. 設定 -->
         <div id="tab-settings" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">システム設定 & クラウド同期</h2>
+            <h2 class="text-xl font-bold text-indigo-200">システム設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-xl space-y-4">
                 <p class="text-xs text-slate-300">
-                    Firebase Realtime Database のURLを入力すると、複数のデバイス間でのリアルタイム自動同期が有効になります。
+                    Firebase Realtime Database によるマルチデバイス間のリアルタイム自動同期が有効になっています。
                 </p>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">Firebase Database URL</label>
-                    <input type="text" id="fb-url" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="https://original-tetsudo-430ac-default-rtdb.firebaseio.com">
-                </div>
-                <button onclick="saveFirebaseConfig()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition shadow">クラウド接続を保存・開始</button>
-                <hr class="border-slate-700 my-2">
-                <div class="flex gap-4">
-                    <button onclick="exportJSON()" class="flex-1 bg-indigo-700 hover:bg-indigo-600 text-white py-2 rounded text-sm">JSONファイル出力</button>
-                    <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm">JSON読込</button>
-                    <input type="file" id="import-file" class="hidden" onchange="importJSON(event)">
+                    <label class="block text-xs text-slate-400 mb-1">接続中 Firebase Database URL</label>
+                    <input type="text" id="fb-url" readonly class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 cursor-not-allowed">
                 </div>
             </div>
         </div>
@@ -244,15 +237,13 @@
         };
 
         let dbRef = null;
+        const DEFAULT_FB_URL = "https://original-tetsudo-430ac-default-rtdb.firebaseio.com";
 
-        // Firebase接続開始
-        function saveFirebaseConfig() {
-            const url = document.getElementById('fb-url').value.trim();
-            if(!url) { alert("Database URLを入力してください"); return; }
-            
+        // Firebase自動接続
+        function initFirebase() {
             try {
                 if(firebase.apps.length === 0) {
-                    firebase.initializeApp({ databaseURL: url });
+                    firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
                 dbRef = firebase.database().ref('shinomori_railway');
                 dbRef.on('value', (snapshot) => {
@@ -264,20 +255,18 @@
                         dbRef.set(appData);
                     }
                 });
-                document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 document.getElementById('sync-status-text').innerText = "クラウド同期: 接続中 (リアルタイム)";
-                localStorage.setItem('shinomori_fb_url', url);
-                alert("クラウド同期接続に成功しました！");
+                document.getElementById('fb-url').value = DEFAULT_FB_URL;
             } catch(e) {
-                alert("接続エラー: " + e.message);
+                document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                document.getElementById('sync-status-text').innerText = "クラウド同期エラー: " + e.message;
             }
         }
 
         function pushData() {
             if(dbRef) {
                 dbRef.set(appData);
-            } else {
-                localStorage.setItem('shinomori_local', JSON.stringify(appData));
             }
         }
 
@@ -307,7 +296,7 @@
             appData.trains.push({ id: Date.now(), name, type, series, status: "車庫待機中" });
             pushData();
             updateUI();
-            alert("新規列車を追加し、クラウドへ保存しました！");
+            alert("新規列車を追加し、クラウドへ同期しました！");
             switchTab('operation');
         }
 
@@ -414,36 +403,9 @@
             document.getElementById('cab-status').innerText = speed > 0 ? "走行中..." : "停車中";
         }
 
-        // JSON入出力
-        function exportJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "shinomori_railway_data.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
-        function importJSON(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    appData = JSON.parse(e.target.result);
-                    pushData();
-                    updateUI();
-                    alert("JSONデータを正常に読み込みました！");
-                } catch(err) {
-                    alert("JSONの読み込みに失敗しました。");
-                }
-            };
-            reader.readAsText(event.target.files[0]);
-        }
-
-        // 初期化
+        // 初期化実行
         window.onload = function() {
-            const savedUrl = localStorage.getItem('shinomori_fb_url') || "https://original-tetsudo-430ac-default-rtdb.firebaseio.com";
-            document.getElementById('fb-url').value = savedUrl;
-            saveFirebaseConfig();
+            initFirebase();
         };
     </script>
 </body>
