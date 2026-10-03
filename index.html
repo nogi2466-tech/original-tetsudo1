@@ -15,29 +15,30 @@
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col relative">
 
     <!-- ヘッダー -->
-    <header class="bg-indigo-950 border-b border-indigo-800 p-4 shadow-lg flex flex-wrap justify-between items-center gap-4 relative">
+    <header class="bg-indigo-950 border-b border-indigo-800 p-4 shadow-lg flex justify-between items-center gap-4 relative z-50">
         <div class="flex items-center space-x-3">
             <span class="text-3xl">🚄</span>
             <div>
-                <h1 class="text-xl font-bold tracking-wider text-indigo-200">紫句守鉄道 <span class="text-xs font-normal text-indigo-400">しのもり鉄道 - Shinomori Railway</span></h1>
-                <p class="text-xs text-slate-400">総合運行管理・経営シミュレーター</p>
+                <h1 class="text-xl font-bold tracking-wider text-indigo-200">紫句守鉄道 <span class="text-xs font-normal text-indigo-400">しのもり鉄道</span></h1>
+                <p class="text-xs text-slate-400">総合運行管理システム</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <div id="live-datetime" class="bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-indigo-300">
+            <div id="live-datetime" class="hidden sm:block bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-indigo-300">
                 2026/10/03(土) 00:00:00
             </div>
             <div id="event-banner-badge" class="hidden bg-rose-900 text-rose-200 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-700 animate-pulse">
-                🎉 イベント日ダイヤ運行中
+                🎉 イベント日ダイヤ
             </div>
-            <div class="hidden sm:flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+            <div class="hidden md:flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
                 <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                <span id="sync-status-text">クラウド同期: 接続待機中...</span>
+                <span id="sync-status-text">同期待機中</span>
             </div>
+            <!-- 3本線メニューボタン（端に配置） -->
             <button onclick="toggleMenu()" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 p-2 rounded-lg text-white md:hidden transition flex items-center justify-center w-10 h-10 shadow">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -46,8 +47,8 @@
         </div>
     </header>
 
-    <!-- ナビゲーションタブ -->
-    <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 sticky top-0 z-50 backdrop-blur shadow-md">
+    <!-- ナビゲーションタブ（デスクトップ＆モバイル用オーバーレイメニュー） -->
+    <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 sticky top-0 z-40 backdrop-blur shadow-md">
         <button onclick="switchTab('about')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white shadow" data-tab="about">会社について</button>
         <button onclick="switchTab('timetable')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="timetable">時刻表</button>
         <button onclick="switchTab('operation')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="operation">走行位置</button>
@@ -59,7 +60,7 @@
     </nav>
 
     <!-- メインコンテンツ -->
-    <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+    <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full relative z-10">
 
         <!-- 1. 会社について -->
         <div id="tab-about" class="tab-content active space-y-6">
@@ -263,10 +264,10 @@
             <div id="consist-matrix-container" class="space-y-4"></div>
         </div>
 
-        <!-- 7. ダイヤ表 -->
+        <!-- 7. ダイヤ表（紙の時刻表風：左に駅名、上に列車番号と種別） -->
         <div id="tab-dia" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">ダイヤグラム（紙の時刻表風マトリクス）</h2>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 overflow-x-auto">
+            <h2 class="text-xl font-bold text-indigo-200">ダイヤ表（紙の時刻表風マトリクス）</h2>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 overflow-x-auto shadow-xl">
                 <div id="matrix-timetable-container" class="min-w-[800px]"></div>
             </div>
         </div>
@@ -326,18 +327,18 @@
 
         let currentActiveLine = 'main';
 
+        // モバイル用メニューのトグル（右端寄りにオーバーレイ表示）
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
-            menu.classList.toggle('flex-col');
-            menu.classList.toggle('absolute');
-            menu.classList.toggle('top-16');
-            menu.classList.toggle('left-0');
-            menu.classList.toggle('right-0');
-            menu.classList.toggle('bg-slate-950');
-            menu.classList.toggle('p-4');
-            menu.classList.toggle('shadow-2xl');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex', 'flex-col', 'absolute', 'top-16', 'right-2', 'bg-slate-950/95', 'border', 'border-indigo-800', 'p-3', 'rounded-xl', 'shadow-2xl', 'z-50', 'space-y-2');
+                menu.classList.remove('space-x-1', 'px-4', 'py-2', 'sticky', 'top-0', 'backdrop-blur');
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex', 'flex-col', 'absolute', 'top-16', 'right-2', 'bg-slate-950/95', 'border', 'border-indigo-800', 'p-3', 'rounded-xl', 'shadow-2xl', 'z-50', 'space-y-2');
+                menu.classList.add('space-x-1', 'px-4', 'py-2', 'sticky', 'top-0', 'backdrop-blur');
+            }
         }
 
         function switchTab(tabId) {
@@ -352,8 +353,11 @@
                 targetBtn.classList.add('bg-indigo-600', 'text-white', 'shadow');
                 targetBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
             }
+            
             const menu = document.getElementById('nav-menu');
-            if(menu.classList.contains('absolute')) toggleMenu();
+            if(window.innerWidth < 768 && !menu.classList.contains('hidden')) {
+                toggleMenu();
+            }
 
             if (tabId === 'dia') renderMatrixTimetable();
             if (tabId === 'operation') renderRouteMap();
@@ -385,7 +389,7 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                dbRef = firebase.database().ref('shinomori_railway_v6');
+                dbRef = firebase.database().ref('shinomori_railway_v7');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if(val) {
@@ -396,19 +400,17 @@
                     } else {
                         dbRef.set(appData);
                     }
-                    // URLクエリパラメータによる運行状況変更の処理
                     handleUrlQueryAction();
                 });
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-                document.getElementById('sync-status-text').innerText = "クラウド同期: 接続中";
+                document.getElementById('sync-status-text').innerText = "同期中";
                 document.getElementById('fb-url').value = DEFAULT_FB_URL;
             } catch(e) {
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
-                document.getElementById('sync-status-text').innerText = "クラウド同期エラー";
+                document.getElementById('sync-status-text').innerText = "同期エラー";
             }
         }
 
-        // URLクエリパラメータを解析して運行状況を自動変更する機能
         function handleUrlQueryAction() {
             const params = new URLSearchParams(window.location.search);
             const targetTrainNum = params.get('train');
@@ -424,7 +426,6 @@
                 });
                 if (updated) {
                     pushData();
-                    console.log(`URLクエリにより列車 ${targetTrainNum} のステータスを ${newStatus} に更新しました`);
                 }
             }
         }
@@ -589,6 +590,7 @@
             `).join('');
         }
 
+        // 紙の時刻表風ダイヤ表（左に駅名、上に列車番号・種別、交点に発車時間）
         function renderMatrixTimetable() {
             const container = document.getElementById('matrix-timetable-container');
             if(!container) return;
@@ -603,19 +605,19 @@
                 <table class="w-full border-collapse text-xs text-center">
                     <thead>
                         <tr class="bg-slate-900 text-indigo-200 border-b border-slate-700">
-                            <th class="p-2 border-r border-slate-700 text-left sticky left-0 bg-slate-900 z-10">駅名</th>
+                            <th class="p-3 border-r border-slate-700 text-left sticky left-0 bg-slate-900 z-10">駅名</th>
             `;
             trains.forEach(t => {
-                html += `<th class="p-2 border-r border-slate-700"><div class="font-bold text-indigo-300">${t.trainNum}</div><div class="text-[10px] text-slate-400">${t.type}</div></th>`;
+                html += `<th class="p-3 border-r border-slate-700 min-w-[90px]"><div class="font-bold text-indigo-300 text-sm">${t.trainNum}</div><div class="text-[10px] text-slate-400 bg-slate-800 px-1 rounded mt-1">${t.type}</div></th>`;
             });
             html += `</tr></thead><tbody class="divide-y divide-slate-800 text-slate-300">`;
 
             allStationsMaster.forEach(st => {
-                html += `<tr class="hover:bg-slate-750"><td class="p-2 border-r border-slate-700 text-left font-bold sticky left-0 bg-slate-800 z-10">${st.id}. ${st.name}</td>`;
+                html += `<tr class="hover:bg-slate-750"><td class="p-3 border-r border-slate-700 text-left font-bold sticky left-0 bg-slate-800 z-10">${st.id}. ${st.name}</td>`;
                 trains.forEach(t => {
                     const isMatch = (t.startSt === st.id || t.endSt === st.id || parseInt(st.id || '1')%3 === 0);
                     const timeCell = isMatch ? `08:${String(parseInt(st.id || '1')*2).padStart(2,'0')}` : '｜';
-                    html += `<td class="p-2 border-r border-slate-800 font-mono">${timeCell}</td>`;
+                    html += `<td class="p-3 border-r border-slate-800 font-mono">${timeCell}</td>`;
                 });
                 html += `</tr>`;
             });
