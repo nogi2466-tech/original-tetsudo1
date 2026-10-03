@@ -28,18 +28,13 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <!-- 現在日時表示 -->
             <div id="live-datetime" class="bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-indigo-300">
                 2026/10/03(土) 00:00:00
             </div>
-
-            <!-- クラウド同期ステータス -->
             <div class="hidden sm:flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
                 <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="sync-status-text">クラウド同期: 接続待機中...</span>
             </div>
-
-            <!-- ハンバーガーメニューボタン（三本線） -->
             <button onclick="toggleMenu()" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 p-2 rounded-lg text-white md:hidden transition flex items-center justify-center w-10 h-10 shadow">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -68,7 +63,7 @@
             <div class="bg-gradient-to-r from-indigo-900 to-slate-800 p-6 rounded-2xl border border-indigo-700/50 shadow-xl space-y-3">
                 <h2 class="text-2xl font-bold text-indigo-100">紫句守鉄道株式会社 <span class="text-sm font-normal text-indigo-300">Shinomori Railway Co., Ltd.</span></h2>
                 <p class="text-slate-300 text-sm leading-relaxed">
-                    紫句守鉄道は、首都圏と豊かな自然に恵まれた紫句守・星句高原エリアを結ぶ主要幹線を運行する鉄道会社です。「安全・信頼・快適」を経営の基本方針に掲げ、地域社会の発展と観光需要の活性化に貢献しています。
+                    紫句守鉄道は、首都圏と豊かな自然に恵まれた紫句守・星句高原・句守支線エリアを結ぶ主要幹線を運行する鉄道会社です。「安全・信頼・快適」を経営の基本方針に掲げ、地域社会の発展と観光需要の活性化に貢献しています。
                 </p>
             </div>
             
@@ -80,17 +75,15 @@
                         <li><span class="text-slate-400 inline-block w-28">設立</span> 1965年4月1日</li>
                         <li><span class="text-slate-400 inline-block w-28">本社所在地</span> 陽光県紫句守市中央一丁目1番地</li>
                         <li><span class="text-slate-400 inline-block w-28">代表取締役社長</span> 紫野 太郎</li>
-                        <li><span class="text-slate-400 inline-block w-28">事業内容</span> 鉄道事業、観光開発事業、不動産事業</li>
                     </ul>
                 </div>
                 
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
-                    <h3 class="text-indigo-400 font-bold border-b border-slate-700 pb-2">路線データ</h3>
+                    <h3 class="text-indigo-400 font-bold border-b border-slate-700 pb-2">路線・車両データ</h3>
                     <ul class="text-sm text-slate-300 space-y-2">
-                        <li><span class="text-slate-400 inline-block w-28">営業路線数</span> 4路線（全60駅）</li>
-                        <li><span class="text-slate-400 inline-block w-28">総営業キロ</span> 142.5 km</li>
+                        <li><span class="text-slate-400 inline-block w-28">運行路線</span> 紫雲本線(1〜30)、星句高原線(31〜40)、句守支線(41〜55)、紫霞観光線(56〜60)、直通(09〜1)</li>
+                        <li><span class="text-slate-400 inline-block w-28">保有形式</span> S1系, S2系, S3系, S4系, S5系, S100系, S900系</li>
                         <li><span class="text-slate-400 inline-block w-28">最高速度</span> 130 km/h（特急S100系）</li>
-                        <li><span class="text-slate-400 inline-block w-28">保安方式</span> ATS-P / デジタル列車制御装置</li>
                     </ul>
                 </div>
             </div>
@@ -102,9 +95,7 @@
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">駅選択</label>
-                    <select id="tt-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white">
-                        <!-- 動的生成 -->
-                    </select>
+                    <select id="tt-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white"></select>
                 </div>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">方向</label>
@@ -129,16 +120,16 @@
 
         <!-- 3. 走行位置 -->
         <div id="tab-operation" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">リアルタイム運行状況マップ（エレサイト風）</h2>
+            <h2 class="text-xl font-bold text-indigo-200">リアルタイム運行状況マップ</h2>
             <div class="flex flex-wrap gap-2 bg-slate-800 p-3 rounded-xl border border-slate-700">
                 <button onclick="switchLine('main')" class="line-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow" data-line="main">紫雲本線 (1〜30)</button>
+                <button onclick="switchLine('plateau')" class="line-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-900 text-slate-300 hover:bg-slate-700 border border-slate-700" data-line="plateau">星句高原線 (31〜40)</button>
                 <button onclick="switchLine('branch')" class="line-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-900 text-slate-300 hover:bg-slate-700 border border-slate-700" data-line="branch">句守支線 (41〜55)</button>
                 <button onclick="switchLine('sight')" class="line-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-900 text-slate-300 hover:bg-slate-700 border border-slate-700" data-line="sight">紫霞観光線 (56〜60)</button>
-                <button onclick="switchLine('plateau')" class="line-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-900 text-slate-300 hover:bg-slate-700 border border-slate-700" data-line="plateau">星句高原線 (31〜40)</button>
             </div>
 
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 relative overflow-y-auto max-h-[650px] shadow-xl">
-                <div id="line-title-banner" class="text-xs text-indigo-300 mb-6 text-center font-bold">紫雲本線 運行モニター（全30駅）</div>
+                <div id="line-title-banner" class="text-xs text-indigo-300 mb-6 text-center font-bold">紫雲本線 運行モニター</div>
                 <div class="relative max-w-lg mx-auto py-6">
                     <div class="absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-2 bg-gradient-to-b from-indigo-500 via-sky-500 to-indigo-600 rounded-full"></div>
                     <div id="route-map-stations" class="space-y-8 relative z-10"></div>
@@ -146,7 +137,7 @@
             </div>
         </div>
 
-        <!-- 4. 列車情報 (コンパクトなテーブル＆追加分のみ表示) -->
+        <!-- 4. 列車情報 -->
         <div id="tab-traininfo" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">列車情報一覧</h2>
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
@@ -158,22 +149,20 @@
                                 <th class="p-3">運用番号</th>
                                 <th class="p-3">種別</th>
                                 <th class="p-3">行き先</th>
-                                <th class="p-3">両数</th>
+                                <th class="p-3">両数・編成</th>
                                 <th class="p-3">状態</th>
                             </tr>
                         </thead>
-                        <tbody id="train-info-tbody" class="divide-y divide-slate-700 text-slate-300">
-                            <!-- 動的生成 -->
-                        </tbody>
+                        <tbody id="train-info-tbody" class="divide-y divide-slate-700 text-slate-300"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- 5. 列車追加 (詳細設定) -->
+        <!-- 5. 列車追加 -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-2xl space-y-5">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -189,38 +178,65 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">種別</label>
-                        <select id="add-train-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                        <select id="add-train-type" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
                             <option>特急</option>
                             <option>通勤急行</option>
                             <option>急行</option>
+                            <option>通勤快速</option>
                             <option>快速</option>
                             <option>準急</option>
                             <option>普通</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">両数</label>
-                        <input type="number" id="add-cars-count" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="8" min="1" max="16">
-                    </div>
-                    <div>
                         <label class="block text-xs text-slate-400 mb-1">路線名</label>
                         <select id="add-train-line" onchange="updateAddStationDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option value="main">紫雲本線</option>
-                            <option value="branch">句守支線</option>
-                            <option value="sight">紫霞観光線</option>
-                            <option value="plateau">星句高原線</option>
+                            <option value="main">紫雲本線 (1〜30)</option>
+                            <option value="plateau">星句高原線 (31〜40)</option>
+                            <option value="branch">句守支線 (41〜55)</option>
+                            <option value="sight">紫霞観光線 (56〜60)</option>
+                            <option value="direct">直通路線 (09〜1)</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">両数</label>
+                        <select id="add-cars-count" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option>4両</option><option>6両</option><option>8両</option><option>10両</option><option>4＋4両</option><option>4＋6両</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 列車編成（形式＆編成番号） -->
+                <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
+                    <span class="text-xs text-indigo-300 font-bold block">列車編成設定（形式・番号）</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">形式</label>
+                            <select id="consist-series" onchange="updateConsistNumbers()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                                <option value="S1">S1系 (10両/8両)</option>
+                                <option value="S2">S2系 (10両/8両)</option>
+                                <option value="S3">S3系 (10両/8両/6両/4両)</option>
+                                <option value="S4">S4系 (10両/8両/6両)</option>
+                                <option value="S5">S5系 (10両)</option>
+                                <option value="S100" selected>S100系 (特急 10両/6両/4両)</option>
+                                <option value="S900">S900系 (事業用 4両)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">編成番号</label>
+                            <select id="consist-number-sel" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white"></select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">始点駅</label>
-                        <select id="add-start-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        <select id="add-start-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">終点駅</label>
-                        <select id="add-end-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        <select id="add-end-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                 </div>
 
@@ -273,7 +289,7 @@
                 <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
                     <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" id="chk-type-change" onchange="toggleTypeChangeSection()" class="rounded bg-slate-800 border-slate-700 text-indigo-600">
-                        <span class="text-sm font-bold text-indigo-300">途中で種別を変更する（例：区間急行→普通など）</span>
+                        <span class="text-sm font-bold text-indigo-300">途中で種別を変更する</span>
                     </label>
                     <div id="type-change-details" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                         <div>
@@ -282,7 +298,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">変更後種別</label>
-                            <select id="new-train-type" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                            <select id="new-train-type" onchange="updateStationSchedulePreview()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
                                 <option>普通</option><option>準急</option><option>快速</option><option>急行</option><option>特急</option>
                             </select>
                         </div>
@@ -295,9 +311,9 @@
 
                 <!-- 停車駅・時刻表自動生成エリア -->
                 <div class="space-y-2">
-                    <span class="text-xs text-indigo-300 font-bold block">区間停車駅スケジュール（自動設定）</span>
+                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール（自動設定・種別変更対応）</span>
                     <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-48 overflow-y-auto text-xs space-y-2">
-                        <p class="text-slate-400">始点・終点を選択すると停車駅と時刻表が自動展開されます。</p>
+                        <p class="text-slate-400">始点・終点を選択すると自動展開されます。</p>
                     </div>
                 </div>
 
@@ -323,7 +339,7 @@
         <div id="tab-settings" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">システム設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-xl space-y-4">
-                <p class="text-xs text-slate-300">Firebase Realtime Database によるマルチデバイス間のリアルタイム自動同期が有効になっています。</p>
+                <p class="text-xs text-slate-300">Firebase Realtime Database によるマルチデバイス間の自動同期が有効です。</p>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">接続中 Firebase Database URL</label>
                     <input type="text" id="fb-url" readonly class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 cursor-not-allowed">
@@ -334,48 +350,66 @@
     </main>
 
     <script>
+        // 完全な駅マスターデータ (09〜60)
+        const allStationsMaster = [
+            {id: "09", name: "水鳥湿原"}, {id: "08", name: "青蓮寺"}, {id: "07", name: "紫水"}, {id: "06", name: "瑠璃川"}, {id: "05", name: "翡翠野"}, {id: "04", name: "琥珀谷"}, {id: "03", name: "瑪瑙台"}, {id: "02", name: "天翔"},
+            {id: "1", name: "紫句守中央"}, {id: "2", name: "霞詠ヶ丘"}, {id: "3", name: "紫雲野"}, {id: "4", name: "詩羽町"}, {id: "5", name: "星句台"}, {id: "6", name: "紫陽花前"}, {id: "7", name: "句守書院"}, {id: "8", name: "銀墨坂"}, {id: "9", name: "紫峰高原"}, {id: "10", name: "風詠の森"},
+            {id: "11", name: "宵月町"}, {id: "12", name: "句読通り"}, {id: "13", name: "紫霞野"}, {id: "14", name: "鏡句池"}, {id: "15", name: "雨詠坂"}, {id: "16", name: "紫都新町"}, {id: "17", name: "句守空港"}, {id: "18", name: "星詠港"}, {id: "19", name: "紫光浜"}, {id: "20", name: "潮句の杜"},
+            {id: "21", name: "紫苑台"}, {id: "22", name: "句守温泉"}, {id: "23", name: "霧詠峠"}, {id: "24", name: "鷲羽句守"}, {id: "25", name: "紫野学園前"}, {id: "26", name: "書詠通り"}, {id: "27", name: "月句台"}, {id: "28", name: "紫句守美術館"}, {id: "29", name: "詩風町"}, {id: "30", name: "紫句守展示場"},
+            {id: "31", name: "星句高原入口"}, {id: "32", name: "星霧の丘"}, {id: "33", name: "天詠台"}, {id: "34", name: "星句牧場前"}, {id: "35", name: "星句温泉郷"}, {id: "36", name: "星句森林"}, {id: "37", name: "星句湖畔"}, {id: "38", name: "句守詩碑前"}, {id: "39", name: "星句高原村"}, {id: "40", name: "星句高原"},
+            {id: "41", name: "紫句守港"}, {id: "42", name: "紫句守湾岸"}, {id: "43", name: "句守湾岸"}, {id: "44", name: "紫句守タワー"}, {id: "45", name: "句守の杜"}, {id: "46", name: "紫句守工業団地"}, {id: "47", name: "紫句守工業"}, {id: "48", name: "鉄輪詩町"}, {id: "49", name: "紫句守市場"}, {id: "50", name: "詩詠の里"},
+            {id: "51", name: "紫句守農園"}, {id: "52", name: "紫句守劇場前"}, {id: "53", name: "句守未来都市"}, {id: "54", name: "紫句守研究所"}, {id: "55", name: "詩句の丘"},
+            {id: "56", name: "紫句守展望台"}, {id: "57", name: "句守星見台"}, {id: "58", name: "紫句守森林公園"}, {id: "59", name: "紫句守詩碑前"}, {id: "60", name: "紫句守詩碑"}
+        ];
+
         const linesData = {
-            main: {
-                name: "紫雲本線",
-                stations: Array.from({length: 30}, (_, i) => ({
-                    id: String(i+1).padStart(2, '0'),
-                    name: i === 0 ? "紫句守中央" : i === 2 ? "紫雲野" : i === 12 ? "紫霞野" : i === 29 ? "紫句守展示場" : `紫雲本線-${i+1}号駅`,
-                    facilities: i === 0 ? ["特急停車"] : i === 29 ? ["終点"] : ["普通停車"]
-                }))
-            },
-            branch: {
-                name: "句守支線",
-                stations: Array.from({length: 15}, (_, i) => {
-                    const stNum = 41 + i;
-                    return {
-                        id: String(stNum),
-                        name: i === 0 ? "句守温泉" : i === 14 ? "奥句守" : `句守支線-${stNum}`,
-                        facilities: ["支線運用"]
-                    };
-                })
-            },
-            sight: {
-                name: "紫霞観光線",
-                stations: Array.from({length: 5}, (_, i) => {
-                    const stNum = 56 + i;
-                    return {
-                        id: String(stNum),
-                        name: i === 0 ? "紫霞湖畔" : i === 4 ? "展望台" : `観光線-${stNum}`,
-                        facilities: ["観光特急"]
-                    };
-                })
-            },
-            plateau: {
-                name: "星句高原線",
-                stations: Array.from({length: 10}, (_, i) => {
-                    const stNum = 31 + i;
-                    return {
-                        id: String(stNum),
-                        name: i === 0 ? "星句口" : i === 9 ? "高原リゾート" : `高原線-${stNum}`,
-                        facilities: ["山岳対応"]
-                    };
-                })
-            }
+            main: { name: "紫雲本線", stations: allStationsMaster.filter(s => { const n = parseInt(s.id); return !isNaN(n) && n >= 1 && n <= 30; }) },
+            plateau: { name: "星句高原線", stations: allStationsMaster.filter(s => { const n = parseInt(s.id); return !isNaN(n) && n >= 31 && n <= 40; }) },
+            branch: { name: "句守支線", stations: allStationsMaster.filter(s => { const n = parseInt(s.id); return !isNaN(n) && n >= 41 && n <= 55; }) },
+            sight: { name: "紫霞観光線", stations: allStationsMaster.filter(s => { const n = parseInt(s.id); return !isNaN(n) && n >= 56 && n <= 60; }) },
+            direct: { name: "他の会社直通路線", stations: allStationsMaster.filter(s => s.id.startsWith("0") || parseInt(s.id) <= 9) }
+        };
+
+        // 各種別の停車駅パターンの定義（ご提示データ完全準拠）
+        const stopPatterns = {
+            "特急": [
+                ["1", "3", "13", "16", "17", "23", "28", "30"],
+                ["1", "3", "13", "16", "17", "23", "28", "30", "35", "40"],
+                ["1", "3", "13", "43", "44", "50", "52", "55"],
+                ["1", "3", "13", "16", "17", "23", "28", "56", "60"]
+            ],
+            "通勤急行": [
+                ["1", "3", "6", "13", "16", "17", "20", "24", "28", "30"],
+                ["1", "3", "6", "13", "43", "48", "50", "52", "55"],
+                ["1", "3", "6", "13", "16", "17", "20", "24", "28", "56", "60"]
+            ],
+            "急行": [
+                ["09", "06", "04", "02", "1", "3", "6", "9", "13", "16", "17", "20", "23", "28", "30"],
+                ["09", "06", "04", "02", "1", "2", "3", "6", "9", "13", "43", "44", "48", "50", "52", "55"],
+                ["09", "06", "04", "02", "1", "3", "6", "9", "13", "16", "17", "20", "23", "28", "56", "60"],
+                ["1", "3", "6", "9", "13", "16", "17", "20", "23", "28", "30"],
+                ["1", "3", "6", "9", "13", "43", "44", "48", "50", "52", "55"],
+                ["1", "3", "6", "9", "13", "16", "17", "20", "23", "28", "56", "60"]
+            ],
+            "通勤快速": [
+                ["1", "3", "5", "7", "9", "13", "16", "17", "20", "23", "24", "28", "30"],
+                ["1", "3", "5", "7", "9", "13", "42", "44", "45", "46", "48", "50", "52", "53", "55"],
+                ["1", "3", "5", "7", "9", "13", "16", "17", "20", "23", "24", "28", "56", "57", "58", "60"]
+            ],
+            "快速": [
+                ["1", "3", "5", "6", "7", "9", "13", "16", "17", "20", "23", "24", "28", "30"],
+                ["1", "3", "5", "6", "7", "9", "13", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55"],
+                ["1", "3", "5", "6", "7", "9", "13", "16", "17", "20", "23", "24", "28", "56", "57", "58", "60"]
+            ],
+            "準急": [
+                ["1", "3", "5", "6", "7", "9", "11", "13", "16", "17", "19", "20", "23", "24", "25", "26", "28", "29", "30"],
+                ["1", "3", "5", "6", "7", "9", "11", "13", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55"],
+                ["1", "3", "5", "6", "7", "9", "11", "13", "16", "17", "19", "20", "23", "24", "25", "26", "28", "56", "57", "58", "59", "60"]
+            ],
+            "普通": [
+                ["09", "08", "07", "06", "05", "04", "03", "02", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
+                ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"]
+            ]
         };
 
         let currentActiveLine = 'main';
@@ -436,7 +470,7 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                dbRef = firebase.database().ref('shinomori_railway_v3');
+                dbRef = firebase.database().ref('shinomori_railway_v4');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if(val) {
@@ -476,6 +510,20 @@
             updateStationSchedulePreview();
         }
 
+        function updateConsistNumbers() {
+            const series = document.getElementById('consist-series').value;
+            const sel = document.getElementById('consist-number-sel');
+            let opts = [];
+            if(series === 'S1') opts = ['01〜05 (10両)', '06〜10 (8両)'];
+            else if(series === 'S2') opts = ['01〜15 (10両)', '16〜25 (8両)'];
+            else if(series === 'S3') opts = ['01〜10 (10両)', '11〜15 (8両)', '16〜20 (6両)', '21〜25 (4両)'];
+            else if(series === 'S4') opts = ['01〜10 (10両)', '11〜20 (8両)', '20〜25 (6両)'];
+            else if(series === 'S5') opts = ['01〜04 (10両)'];
+            else if(series === 'S100') opts = ['01〜10 (10両)', '11〜15 (6両)', '16〜20 (4両)'];
+            else if(series === 'S900') opts = ['第1編成 (4両事業用)'];
+            sel.innerHTML = opts.map(o => `<option>${o}</option>`).join('');
+        }
+
         function toggleCoupleSection() {
             const isChecked = document.getElementById('chk-couple').checked;
             document.getElementById('couple-details').classList.toggle('hidden', !isChecked);
@@ -493,6 +541,7 @@
             const lineKey = document.getElementById('add-train-line').value;
             const startId = document.getElementById('add-start-station').value;
             const endId = document.getElementById('add-end-station').value;
+            const trainType = document.getElementById('add-train-type').value;
             const stations = linesData[lineKey].stations;
             
             const sIdx = stations.findIndex(s => s.id === startId);
@@ -500,15 +549,32 @@
             const preview = document.getElementById('station-schedule-preview');
             
             if(sIdx === -1 || eIdx === -1 || sIdx > eIdx) {
-                preview.innerHTML = `<p class="text-red-400">始点と終点の順序が正しくありません。</p>`;
+                preview.innerHTML = `<p class="text-red-400">始点と終点の順序を確認してください。</p>`;
                 return;
             }
 
-            let html = `<table class="w-full text-left"><thead><tr class="text-indigo-300 border-b border-slate-800"><th class="p-1">駅名</th><th class="p-1">到着</th><th class="p-1">発車</th></tr></thead><tbody>`;
+            // 該当種別の停車駅リストを取得
+            const patterns = stopPatterns[trainType] || [allStationsMaster.map(s => s.id)];
+            const targetStopIds = patterns[0]; // デフォルトパターン
+
+            let html = `<table class="w-full text-left"><thead><tr class="text-indigo-300 border-b border-slate-800"><th class="p-1">駅名</th><th class="p-1">種別判定</th><th class="p-1">到着</th><th class="p-1">発車</th></tr></thead><tbody>`;
+            
+            let count = 0;
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = stations[i];
-                const timeStr = `08:${String(10 + (i - sIdx)*3).padStart(2,'0')}`;
-                html += `<tr class="border-b border-slate-800"><td class="p-1">${st.id}. ${st.name}</td><td class="p-1 font-mono">${timeStr}</td><td class="p-1 font-mono">${timeStr}</td></tr>`;
+                const isStop = targetStopIds.includes(st.id) || i === sIdx || i === eIdx;
+                if(!isStop) continue;
+
+                const timeStr = `08:${String(10 + count * 4).padStart(2,'0')}`;
+                html += `
+                    <tr class="border-b border-slate-800">
+                        <td class="p-1 font-bold">${st.id}. ${st.name}</td>
+                        <td class="p-1 text-indigo-400">停車</td>
+                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
+                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
+                    </tr>
+                `;
+                count++;
             }
             html += `</tbody></table>`;
             preview.innerHTML = html;
@@ -522,12 +588,11 @@
             const line = document.getElementById('add-train-line').value;
             const startSt = document.getElementById('add-start-station').value;
             const endSt = document.getElementById('add-end-station').value;
+            const series = document.getElementById('consist-series').value;
+            const consistNum = document.getElementById('consist-number-sel').value;
             
             const isCouple = document.getElementById('chk-couple').checked;
-            const frontSeries = isCouple ? document.getElementById('front-series').value : "";
-            const frontNum = isCouple ? document.getElementById('front-number').value : "";
-            const rearSeries = isCouple ? document.getElementById('rear-series').value : "";
-            const rearNum = isCouple ? document.getElementById('rear-number').value : "";
+            const carsStr = cars + ` (${series} ${consistNum}` + (isCouple ? ` + 連結編成)` : `)`);
 
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -540,7 +605,7 @@
                 line,
                 startSt,
                 endSt,
-                cars: cars + "両" + (isCouple ? ` (${frontSeries} ${frontNum} + ${rearSeries} ${rearNum})` : ""),
+                cars: carsStr,
                 status: randomStatus,
                 stationId: startSt,
                 direction: "down"
@@ -548,11 +613,10 @@
 
             pushData();
             updateUI();
-            alert("新しい列車を追加しました！「列車情報」および「走行位置」に反映されます。");
+            alert("列車を正常に追加しました！");
             switchTab('traininfo');
         }
 
-        // 列車情報テーブル（コンパクト・追加分のみ・状態制限）
         function renderTrainInfoTable() {
             const tbody = document.getElementById('train-info-tbody');
             if(!tbody) return;
@@ -571,12 +635,15 @@
                 if(t.status === "運行終了") badgeColor = "bg-rose-950 text-rose-300 border border-rose-700";
                 if(t.status === "運行なし") badgeColor = "bg-slate-800 text-slate-500";
 
+                const startName = allStationsMaster.find(s => s.id === t.startSt)?.name || t.startSt;
+                const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
+
                 return `
                     <tr class="hover:bg-slate-750 transition">
                         <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
                         <td class="p-3 font-mono">${t.opNum}</td>
                         <td class="p-3">${t.type}</td>
-                        <td class="p-3">${t.endSt}行き</td>
+                        <td class="p-3">${startName} → ${endName}</td>
                         <td class="p-3">${t.cars}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
                     </tr>
@@ -584,7 +651,6 @@
             }).join('');
         }
 
-        // 走行位置マップ描画
         function renderRouteMap() {
             const container = document.getElementById('route-map-stations');
             const titleBanner = document.getElementById('line-title-banner');
@@ -594,18 +660,11 @@
             titleBanner.innerText = `${lineInfo.name} 運行モニター（全${lineInfo.stations.length}駅）`;
 
             container.innerHTML = lineInfo.stations.map((st) => {
-                const downTrains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id && t.direction === 'down');
-                const upTrains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id && t.direction === 'up');
+                const trains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id);
 
                 return `
                     <div class="relative flex items-center justify-between">
-                        <div class="w-5/12 pr-4 text-right space-y-1">
-                            ${upTrains.map(t => `
-                                <div class="inline-block bg-slate-900 border border-sky-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
-                                    <span class="font-bold text-sky-300">${t.trainNum} (${t.type})</span>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <div class="w-5/12 pr-4 text-right space-y-1"></div>
                         <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
                             <div class="w-6 h-6 rounded-full bg-slate-900 border-4 border-indigo-500 shadow flex items-center justify-center z-20">
                                 <div class="w-2 h-2 rounded-full bg-white"></div>
@@ -616,9 +675,9 @@
                                 <span class="font-bold text-indigo-200 text-sm block">${st.id}. ${st.name}</span>
                             </div>
                             <div class="space-y-1">
-                                ${downTrains.map(t => `
-                                    <div class="inline-block bg-slate-900 border border-rose-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
-                                        <span class="font-bold text-rose-300">${t.trainNum} (${t.type})</span>
+                                ${trains.map(t => `
+                                    <div class="inline-block bg-slate-900 border border-emerald-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
+                                        <span class="font-bold text-emerald-300">${t.trainNum} (${t.type})</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -631,25 +690,20 @@
         function initTimetableDropdowns() {
             const stSelect = document.getElementById('tt-station');
             if(!stSelect) return;
-            let allStations = [];
-            Object.values(linesData).forEach(l => {
-                l.stations.forEach(st => {
-                    allStations.push(`<option value="${st.id}">${l.name} - ${st.id}. ${st.name}</option>`);
-                });
-            });
-            stSelect.innerHTML = allStations.join('');
+            stSelect.innerHTML = allStationsMaster.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
         }
 
         function renderTimetable() {
             const stId = document.getElementById('tt-station').value;
             const container = document.getElementById('timetable-container');
+            const stObj = allStationsMaster.find(s => s.id === stId);
             container.innerHTML = `
-                <div class="mb-3 text-xs text-indigo-300 font-bold">【駅 ${stId}】 発車時刻表サンプル</div>
+                <div class="mb-3 text-xs text-indigo-300 font-bold">【${stObj ? stObj.name : stId}駅】 時刻表</div>
                 <table class="w-full text-left border-collapse text-sm">
-                    <thead><tr class="border-b border-slate-700 text-indigo-200 text-xs"><th class="p-2">時</th><th class="p-2">分</th></tr></thead>
+                    <thead><tr class="border-b border-slate-700 text-indigo-200 text-xs"><th class="p-2">時</th><th class="p-2">分・列車種別</th></tr></thead>
                     <tbody class="text-slate-300">
                         <tr class="border-b border-slate-800"><td class="p-2 font-mono font-bold text-indigo-400">07</td><td class="p-2">05(特急) 18(快速) 32(普通) 45(急行)</td></tr>
-                        <tr class="border-b border-slate-800"><td class="p-2 font-mono font-bold text-indigo-400">08</td><td class="p-2">02(特急) 15(普通) 30(快速) 48(急行)</td></tr>
+                        <tr class="border-b border-slate-800"><td class="p-2 font-mono font-bold text-indigo-400">08</td><td class="p-2">02(特急) 15(普通) 30(快速) 48(通勤急行)</td></tr>
                     </tbody>
                 </table>
             `;
@@ -661,7 +715,7 @@
             list.innerHTML = `
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-2">
                     <h3 class="font-bold text-indigo-300">登録編成構成リスト</h3>
-                    <p class="text-xs text-slate-400">列車追加時に設定した編成情報がここに同期されます。</p>
+                    <p class="text-xs text-slate-400">列車追加時に設定した形式および編成番号がこちらに同期されます。</p>
                 </div>
             `;
         }
@@ -695,6 +749,7 @@
         window.onload = function() {
             initFirebase();
             updateAddStationDropdowns();
+            updateConsistNumbers();
             initTimetableDropdowns();
             setInterval(updateLiveDateTime, 1000);
             updateLiveDateTime();
