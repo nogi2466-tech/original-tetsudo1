@@ -293,6 +293,7 @@
         </div>
 
     </main>
+
     <script>
         const allStationsMaster = [
             {id: "09", name: "水鳥湿原"}, {id: "08", name: "青蓮寺"}, {id: "07", name: "紫水"}, {id: "06", name: "瑠璃川"}, {id: "05", name: "翡翠野"}, {id: "04", name: "琥珀谷"}, {id: "03", name: "瑪瑙台"}, {id: "02", name: "天翔"},
@@ -395,6 +396,7 @@
                     } else {
                         dbRef.set(appData);
                     }
+                    // URLクエリパラメータによる運行状況変更の処理
                     handleUrlQueryAction();
                 });
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
@@ -406,6 +408,7 @@
             }
         }
 
+        // URLクエリパラメータを解析して運行状況を自動変更する機能
         function handleUrlQueryAction() {
             const params = new URLSearchParams(window.location.search);
             const targetTrainNum = params.get('train');
@@ -421,6 +424,7 @@
                 });
                 if (updated) {
                     pushData();
+                    console.log(`URLクエリにより列車 ${targetTrainNum} のステータスを ${newStatus} に更新しました`);
                 }
             }
         }
@@ -630,4 +634,122 @@
                     <button onclick="removeEventDate(${idx})" class="text-rose-400 hover:text-rose-200 font-bold">×</button>
                 </span>
             `).join('');
-     
+        }
+
+        function addEventDate() {
+            const val = document.getElementById('new-event-date').value;
+            if(!val) { alert("日付を選択してください"); return; }
+            if(!appData.eventDates) appData.eventDates = [];
+            if(!appData.eventDates.includes(val)) {
+                appData.eventDates.push(val);
+                pushData();
+                renderEventDatesList();
+                checkEventDayStatus();
+                alert("イベント日を追加しました！");
+            }
+        }
+
+        function removeEventDate(idx) {
+            appData.eventDates.splice(idx, 1);
+            pushData();
+            renderEventDatesList();
+            checkEventDayStatus();
+        }
+
+        function checkEventDayStatus() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            const badge = document.getElementById('event-banner-badge');
+            if(badge && appData.eventDates && appData.eventDates.includes(todayStr)) {
+                badge.classList.remove('hidden');
+            } else if(badge) {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderRouteMap() {
+            const container = document.getElementById('route-map-stations');
+            const titleBanner = document.getElementById('line-title-banner');
+            if(!container) return;
+            const lineInfo = linesData[currentActiveLine];
+            titleBanner.innerText = `${lineInfo.name} 運行モニター（全${lineInfo.stations.length}駅）`;
+
+            container.innerHTML = lineInfo.stations.map((st) => {
+                const trains = (appData.trains || []).filter(t => t.line === currentActiveLine && t.stationId === st.id);
+                return `
+                    <div class="relative flex items-center justify-between">
+                        <div class="w-5/12 pr-4 text-right space-y-1"></div>
+                        <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
+                            <div class="w-6 h-6 rounded-full bg-slate-900 border-4 border-indigo-500 shadow flex items-center justify-center z-20">
+                                <div class="w-2 h-2 rounded-full bg-white"></div>
+                            </div>
+                        </div>
+                        <div class="w-5/12 pl-6 space-y-2">
+                            <div class="bg-slate-900/90 border border-slate-700 px-3 py-2 rounded-lg shadow">
+                                <span class="font-bold text-indigo-200 text-sm block">${st.id}. ${st.name}</span>
+                            </div>
+                            <div class="space-y-1">
+                                ${trains.map(t => `
+                                    <div class="inline-block bg-slate-900 border border-emerald-500/60 rounded px-2 py-1 text-xs shadow-lg animate-pulse">
+                                        <span class="font-bold text-emerald-300">${t.trainNum} (${t.type})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function initTimetableDropdowns() {
+            const stSelect = document.getElementById('tt-station');
+            if(!stSelect) return;
+            stSelect.innerHTML = allStationsMaster.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
+        }
+
+        function renderTimetable() {
+            const stId = document.getElementById('tt-station').value;
+            const container = document.getElementById('timetable-container');
+            const stObj = allStationsMaster.find(s => s.id === stId);
+            container.innerHTML = `
+                <div class="mb-3 text-xs text-indigo-300 font-bold">【${stObj ? stObj.name : stId}駅】 発車時刻表</div>
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead><tr class="border-b border-slate-700 text-indigo-200 text-xs"><th class="p-2">時</th><th class="p-2">分・列車種別</th></tr></thead>
+                    <tbody class="text-slate-300">
+                        <tr class="border-b border-slate-800"><td class="p-2 font-mono font-bold text-indigo-400">07</td><td class="p-2">05(特急) 18(快速) 32(普通) 45(急行)</td></tr>
+                        <tr class="border-b border-slate-800"><td class="p-2 font-mono font-bold text-indigo-400">08</td><td class="p-2">02(特急) 15(普通) 30(快速) 48(通勤急行)</td></tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function updateLiveDateTime() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const dayOfWeek = days[now.getDay()];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const el = document.getElementById('live-datetime');
+            if(el) el.innerText = `${yyyy}/${mm}/${dd}(${dayOfWeek}) ${hours}:${minutes}:${seconds}`;
+            checkEventDayStatus();
+        }
+
+        window.onload = function() {
+            initFirebase();
+            updateAddStationDropdowns();
+            updateConsistNumbers();
+            initTimetableDropdowns();
+            setInterval(updateLiveDateTime, 1000);
+            updateLiveDateTime();
+        };
+    </script>
+</body>
+</html>
