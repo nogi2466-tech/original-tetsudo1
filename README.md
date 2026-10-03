@@ -161,7 +161,7 @@
             </div>
         </div>
 
-        <!-- 5. 列車追加 (停車駅・時間設定プレビュー付き) -->
+        <!-- 5. 列車追加 -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
@@ -295,6 +295,4 @@
     </main>
 
     <script>
-        const allStationsMaster = [
-            {id: "09", name: "水鳥湿原"}, {id: "08", name: "青蓮寺"}, {id: "07", name: "紫水"}, {id: "06", name: "瑠璃川"}, {id: "05", name: "翡翠野"}, {id: "04", name: "琥珀谷"}, {id: "03", name: "瑪瑙台"}, {id: "02", name: "天翔"},
-            {id: "1"
+        const allSt
