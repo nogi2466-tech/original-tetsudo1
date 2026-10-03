@@ -245,28 +245,33 @@
                     </div>
                 </div>
 
+                <!-- 停車駅・時間設定プレビューエリア -->
+                <div class="space-y-2">
+                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間設定</span>
+                    <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-56 overflow-y-auto text-xs space-y-2">
+                        <p class="text-slate-400">始点・終点を選択すると停車駅と時間設定欄が展開されます。</p>
+                    </div>
+                </div>
+
                 <button onclick="addNewTrain()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition shadow text-sm">列車を登録して一覧・ダイヤグラムに反映</button>
             </div>
         </div>
 
-        <!-- 6. 編成表（全形式・全編成番号・曜日別運用マトリクス） -->
+        <!-- 6. 編成表 -->
         <div id="tab-consist" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">全形式・編成運用管理表</h2>
-            <p class="text-xs text-slate-400">全形式の全編成番号と、曜日ごとの担当運用番号一覧です。</p>
             <div id="consist-matrix-container" class="space-y-4"></div>
         </div>
 
-        <!-- 7. ダイヤ表（紙の時刻表風マトリクス表示） -->
+        <!-- 7. ダイヤ表 -->
         <div id="tab-dia" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">ダイヤグラム（紙の時刻表風マトリクス）</h2>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 overflow-x-auto">
-                <div id="matrix-timetable-container" class="min-w-[800px]">
-                    <!-- 紙の時刻表風マトリクスがここに展開 -->
-                </div>
+                <div id="matrix-timetable-container" class="min-w-[800px]"></div>
             </div>
         </div>
 
-        <!-- 8. 設定（イベント日複数登録） -->
+        <!-- 8. 設定 -->
         <div id="tab-settings" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">システム設定・イベント日管理</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-xl space-y-5">
@@ -278,14 +283,11 @@
                 <hr class="border-slate-700">
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-indigo-300">イベント日カレンダー設定（複数日登録）</h3>
-                    <p class="text-xs text-slate-400">指定した日付になると、自動的に「イベント日ダイヤ（臨時列車）」として運行されます。</p>
                     <div class="flex gap-2">
                         <input type="date" id="new-event-date" class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white">
                         <button onclick="addEventDate()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-bold transition">イベント日を追加</button>
                     </div>
-                    <div id="event-dates-list" class="flex flex-wrap gap-2 pt-2">
-                        <!-- 登録されたイベント日チップ -->
-                    </div>
+                    <div id="event-dates-list" class="flex flex-wrap gap-2 pt-2"></div>
                 </div>
             </div>
         </div>
@@ -293,7 +295,6 @@
     </main>
 
     <script>
-        // 完全な駅マスターデータ (09〜60)
         const allStationsMaster = [
             {id: "09", name: "水鳥湿原"}, {id: "08", name: "青蓮寺"}, {id: "07", name: "紫水"}, {id: "06", name: "瑠璃川"}, {id: "05", name: "翡翠野"}, {id: "04", name: "琥珀谷"}, {id: "03", name: "瑪瑙台"}, {id: "02", name: "天翔"},
             {id: "1", name: "紫句守中央"}, {id: "2", name: "霞詠ヶ丘"}, {id: "3", name: "紫雲野"}, {id: "4", name: "詩羽町"}, {id: "5", name: "星句台"}, {id: "6", name: "紫陽花前"}, {id: "7", name: "句守書院"}, {id: "8", name: "銀墨坂"}, {id: "9", name: "紫峰高原"}, {id: "10", name: "風詠の森"},
@@ -313,7 +314,6 @@
             direct: { name: "他の会社直通路線", stations: allStationsMaster.filter(s => s.id.startsWith("0") || parseInt(s.id) <= 9) }
         };
 
-        // 全形式と全編成番号データ定義
         const fullConsistsData = [
             { series: "S1系", items: ["S1-01 (10両)", "S1-02 (10両)", "S1-03 (10両)", "S1-04 (10両)", "S1-05 (10両)", "S1-06 (8両)", "S1-07 (8両)", "S1-08 (8両)", "S1-09 (8両)", "S1-10 (8両)"] },
             { series: "S2系", items: Array.from({length: 15}, (_,i) => `S2-${String(i+1).padStart(2,'0')} (10両)`).concat(Array.from({length: 10}, (_,i) => `S2-${String(i+16).padStart(2,'0')} (8両)`)) },
@@ -361,6 +361,7 @@
             if (tabId === 'traininfo') renderTrainInfoTable();
             if (tabId === 'consist') renderConsistMatrix();
             if (tabId === 'settings') renderEventDatesList();
+            if (tabId === 'addtrain') updateStationSchedulePreview();
         }
 
         function switchLine(lineKey) {
@@ -375,7 +376,7 @@
             renderRouteMap();
         }
 
-        let appData = { trains: [], eventDates: ["2026-10-15", "2026-11-03"] };
+        let appData = { trains: [], eventDates: ["2026-10-15"] };
         let dbRef = null;
         const DEFAULT_FB_URL = "https://original-tetsudo-430ac-default-rtdb.firebaseio.com";
 
@@ -384,16 +385,19 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                dbRef = firebase.database().ref('shinomori_railway_v5');
+                dbRef = firebase.database().ref('shinomori_railway_v6');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if(val) {
                         appData = val;
+                        if(!appData.trains) appData.trains = [];
                         if(!appData.eventDates) appData.eventDates = ["2026-10-15"];
                         updateUI();
                     } else {
                         dbRef.set(appData);
                     }
+                    // URLクエリパラメータによる運行状況変更の処理
+                    handleUrlQueryAction();
                 });
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 document.getElementById('sync-status-text').innerText = "クラウド同期: 接続中";
@@ -401,6 +405,27 @@
             } catch(e) {
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
                 document.getElementById('sync-status-text').innerText = "クラウド同期エラー";
+            }
+        }
+
+        // URLクエリパラメータを解析して運行状況を自動変更する機能
+        function handleUrlQueryAction() {
+            const params = new URLSearchParams(window.location.search);
+            const targetTrainNum = params.get('train');
+            const newStatus = params.get('status');
+
+            if (targetTrainNum && newStatus && appData.trains) {
+                let updated = false;
+                appData.trains.forEach(t => {
+                    if (t.trainNum === targetTrainNum && t.status !== newStatus) {
+                        t.status = newStatus;
+                        updated = true;
+                    }
+                });
+                if (updated) {
+                    pushData();
+                    console.log(`URLクエリにより列車 ${targetTrainNum} のステータスを ${newStatus} に更新しました`);
+                }
             }
         }
 
@@ -412,6 +437,7 @@
             initTimetableDropdowns();
             renderEventDatesList();
             checkEventDayStatus();
+            updateStationSchedulePreview();
         }
 
         function updateAddStationDropdowns() {
@@ -422,6 +448,7 @@
             document.getElementById('add-start-station').innerHTML = options;
             document.getElementById('add-end-station').innerHTML = options;
             if(stations.length > 1) document.getElementById('add-end-station').selectedIndex = stations.length - 1;
+            updateStationSchedulePreview();
         }
 
         function updateConsistNumbers() {
@@ -431,6 +458,38 @@
             if(found) {
                 sel.innerHTML = found.items.map(it => `<option>${it}</option>`).join('');
             }
+        }
+
+        function updateStationSchedulePreview() {
+            const lineKey = document.getElementById('add-train-line').value;
+            const startId = document.getElementById('add-start-station').value;
+            const endId = document.getElementById('add-end-station').value;
+            const stations = linesData[lineKey].stations;
+            
+            const sIdx = stations.findIndex(s => s.id === startId);
+            const eIdx = stations.findIndex(s => s.id === endId);
+            const preview = document.getElementById('station-schedule-preview');
+            if(!preview) return;
+            
+            if(sIdx === -1 || eIdx === -1 || sIdx > eIdx) {
+                preview.innerHTML = `<p class="text-red-400">始点と終点の順序を確認してください。</p>`;
+                return;
+            }
+
+            let html = `<table class="w-full text-left"><thead><tr class="text-indigo-300 border-b border-slate-800"><th class="p-1">駅名</th><th class="p-1">到着時刻</th><th class="p-1">発車時刻</th></tr></thead><tbody>`;
+            for(let i = sIdx; i <= eIdx; i++) {
+                const st = stations[i];
+                const timeStr = `08:${String(10 + (i - sIdx)*3).padStart(2,'0')}`;
+                html += `
+                    <tr class="border-b border-slate-800">
+                        <td class="p-1 font-bold">${st.id}. ${st.name}</td>
+                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="arr-time bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
+                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="dep-time bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
+                    </tr>
+                `;
+            }
+            html += `</tbody></table>`;
+            preview.innerHTML = html;
         }
 
         function addNewTrain() {
@@ -449,6 +508,7 @@
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 
+            if(!appData.trains) appData.trains = [];
             appData.trains.push({
                 id: Date.now(),
                 trainNum,
@@ -473,12 +533,13 @@
             const tbody = document.getElementById('train-info-tbody');
             if(!tbody) return;
 
-            if(!appData.trains || appData.trains.length === 0) {
+            const trains = appData.trains || [];
+            if(trains.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500">追加された列車はありません。「列車追加」タブから登録してください。</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = appData.trains.map(t => {
+            tbody.innerHTML = trains.map(t => {
                 let badgeColor = "bg-slate-700 text-slate-300";
                 if(t.status === "走行中") badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-700";
                 if(t.status === "停車中") badgeColor = "bg-sky-950 text-sky-300 border border-sky-700";
@@ -505,7 +566,6 @@
             }).join('');
         }
 
-        // 編成表（全形式・全編成番号・曜日別運用マトリクス）
         function renderConsistMatrix() {
             const container = document.getElementById('consist-matrix-container');
             if(!container) return;
@@ -515,8 +575,7 @@
                     <h3 class="font-bold text-indigo-300 text-sm border-b border-slate-700 pb-1">${group.series} 運用割当表</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                         ${group.items.map(item => {
-                            // 該当編成にアサインされている列車を検索
-                            const assigned = appData.trains.filter(t => t.cars.includes(item.split(' ')[0]));
+                            const assigned = (appData.trains || []).filter(t => t.cars.includes(item.split(' ')[0]));
                             const opText = assigned.length > 0 ? assigned.map(a => `${a.opNum}(${a.trainNum})`).join(', ') : '予備・非稼働';
                             return `
                                 <div class="bg-slate-900 p-2.5 rounded border border-slate-700 flex justify-between items-center">
@@ -530,13 +589,12 @@
             `).join('');
         }
 
-        // 紙の時刻表風ダイヤ表（左に駅名、上に列車番号・種別、交点に発車時間）
         function renderMatrixTimetable() {
             const container = document.getElementById('matrix-timetable-container');
             if(!container) return;
 
-            const trains = appData.trains;
-            if(!trains || trains.length === 0) {
+            const trains = appData.trains || [];
+            if(trains.length === 0) {
                 container.innerHTML = `<p class="text-slate-500 text-center py-8">列車が登録されていません。「列車追加」から登録してください。</p>`;
                 return;
             }
@@ -555,9 +613,8 @@
             allStationsMaster.forEach(st => {
                 html += `<tr class="hover:bg-slate-750"><td class="p-2 border-r border-slate-700 text-left font-bold sticky left-0 bg-slate-800 z-10">${st.id}. ${st.name}</td>`;
                 trains.forEach(t => {
-                    // ダミーの通過・発車時刻ロジック
-                    const isMatch = (t.startSt === st.id || t.endSt === st.id || parseInt(st.id)%3 === 0);
-                    const timeCell = isMatch ? `08:${String(parseInt(st.id || 1)*2).padStart(2,'0')}` : '｜';
+                    const isMatch = (t.startSt === st.id || t.endSt === st.id || parseInt(st.id || '1')%3 === 0);
+                    const timeCell = isMatch ? `08:${String(parseInt(st.id || '1')*2).padStart(2,'0')}` : '｜';
                     html += `<td class="p-2 border-r border-slate-800 font-mono">${timeCell}</td>`;
                 });
                 html += `</tr>`;
@@ -567,7 +624,6 @@
             container.innerHTML = html;
         }
 
-        // イベント日管理
         function renderEventDatesList() {
             const listEl = document.getElementById('event-dates-list');
             if(!listEl) return;
@@ -623,7 +679,7 @@
             titleBanner.innerText = `${lineInfo.name} 運行モニター（全${lineInfo.stations.length}駅）`;
 
             container.innerHTML = lineInfo.stations.map((st) => {
-                const trains = appData.trains.filter(t => t.line === currentActiveLine && t.stationId === st.id);
+                const trains = (appData.trains || []).filter(t => t.line === currentActiveLine && t.stationId === st.id);
                 return `
                     <div class="relative flex items-center justify-between">
                         <div class="w-5/12 pr-4 text-right space-y-1"></div>
