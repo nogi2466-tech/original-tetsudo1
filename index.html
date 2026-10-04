@@ -62,50 +62,64 @@
             color: #cbd5e1;
             white-space: nowrap;
         }
-        /* 列車配置スタイル（左右分離） */
+        
+        /* 列車配置スタイル（左右分離 ＆ 改良された見やすいアイコン） */
         .v-train {
             position: absolute;
             transform: translateY(-50%);
             cursor: pointer;
             z-index: 10;
             transition: top 0.6s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .v-train.up-train {
-            right: calc(50% + 30px); /* 中央線の左側 */
+            right: calc(50% + 25px); /* 中央線の左側（上り） */
+            flex-direction: row-reverse;
             text-align: right;
         }
         .v-train.down-train {
-            left: calc(50% + 30px); /* 中央線の右側 */
+            left: calc(50% + 25px); /* 中央線の右側（下り） */
+            flex-direction: row;
             text-align: left;
         }
-        .train-icon-v {
-            width: 26px;
-            height: 26px;
-            background: #ff5722;
-            border-radius: 4px;
-            text-align: center;
+
+        /* 列車アイコンのブラッシュアップデザイン */
+        .train-icon-badge {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
             font-size: 11px;
-            line-height: 26px;
             font-weight: bold;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            border: 1px solid #ff8a65;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            border: 1px solid #60a5fa;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
+        .train-icon-badge.type-特急 { background: linear-gradient(135deg, #ef4444, #991b1b); border-color: #fca5a5; }
+        .train-icon-badge.type-急行 { background: linear-gradient(135deg, #f97316, #c2410c); border-color: #fdba74; }
+        .train-icon-badge.type-快速 { background: linear-gradient(135deg, #eab308, #a16207); border-color: #fde047; color: #1e293b; }
+        .train-icon-badge.type-準急 { background: linear-gradient(135deg, #10b981, #047857); border-color: #6ee7b7; }
+
         .train-card-v {
-            background: #0284c7;
+            background: rgba(15, 23, 42, 0.9);
             color: white;
             border-radius: 6px;
-            padding: 5px 10px;
+            padding: 4px 8px;
             font-size: 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            border: 1px solid #38bdf8;
-            min-width: 110px;
+            border: 1px solid #475569;
+            backdrop-filter: blur(4px);
+            min-width: 100px;
         }
         .train-num-top {
             font-size: 9px;
             font-weight: bold;
-            color: #e2e8f0;
-            margin-bottom: 1px;
+            color: #93c5fd;
             white-space: nowrap;
         }
     </style>
@@ -229,8 +243,8 @@
             <div class="controls bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                     <label class="flex items-center space-x-2 text-sm text-slate-200 cursor-pointer">
-                        <input type="checkbox" id="toggleView" onchange="renderOperationTrack()" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
-                        <span>詳細表示（四角形カード）に切り替える</span>
+                        <input type="checkbox" id="toggleView" onchange="renderOperationTrack()" class="rounded bg-slate-900 border-slate-700 text-indigo-600" checked>
+                        <span>詳細表示（情報カード付き）</span>
                     </label>
                 </div>
                 <div class="text-xs text-indigo-300">
@@ -1155,7 +1169,7 @@
             checkEventDayStatus();
         }
 
-        /* --- 走行位置スクリプト（改良版：正確な駅間マッピング・ポップアップ・自動運行） --- */
+        /* --- 走行位置スクリプト（アイコンデザイン改良版） --- */
         function renderOperationTrack() {
             const containerParent = document.getElementById('track-container-parent');
             if(!containerParent) return;
@@ -1185,21 +1199,29 @@
                 const topPos = 40 + (t.currentIdx * spacing);
                 const destName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
                 const currentStationName = allStationsMaster[t.currentIdx]?.name || '走行中';
+                const typeClass = `type-${t.type}`;
 
                 if(isDetail) {
                     html += `
                         <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
-                            <div class="train-num-top">${t.trainNum}</div>
+                            <div class="train-icon-badge ${typeClass}">
+                                <span>${isUp ? '▲' : '▼'}</span>
+                                <span>${t.type}</span>
+                            </div>
                             <div class="train-card-v">
-                                <div class="font-bold">${t.type} ${destName}行</div>
-                                <div class="text-[9px] text-sky-200">📍 ${currentStationName} (${t.status})</div>
+                                <div class="train-num-top">${t.trainNum} (${t.opNum || 'A01'})</div>
+                                <div class="font-bold text-slate-100">${destName}行</div>
+                                <div class="text-[9px] text-sky-300">📍 ${currentStationName}</div>
                             </div>
                         </div>
                     `;
                 } else {
                     html += `
                         <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
-                            <div class="train-icon-v" title="${t.trainNum}: ${t.type} (${currentStationName})">${t.type.charAt(0)}</div>
+                            <div class="train-icon-badge ${typeClass}" title="${t.trainNum}: ${t.type} (${currentStationName})">
+                                <span>${isUp ? '▲' : '▼'}</span>
+                                <span>${t.trainNum}</span>
+                            </div>
                         </div>
                     `;
                 }
