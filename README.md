@@ -14,20 +14,48 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* スマホメニューを画面上部にすっきりとオーバーレイ表示 */
-        #nav-menu.mobile-open {
-            display: flex;
-            flex-direction: column;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(15, 23, 42, 0.98);
-            padding: 12px;
-            border-bottom: 1px solid #334155;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 100;
-            gap: 6px;
+        /* --- Geminiサイドメニュー風 スマホ用オーバーレイメニュー --- */
+        #nav-menu {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        @media (max-width: 767px) {
+            #nav-menu {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                background: #0f172a; /* 落ち着いたダークトーン */
+                padding: 20px 16px;
+                border-right: 1px solid #334155;
+                box-shadow: 10px 0 25px rgba(0,0,0,0.6);
+                z-index: 100;
+                gap: 8px;
+                transform: translateX(-100%);
+                opacity: 0;
+                pointer-events: none;
+                overflow-y: auto;
+            }
+            #nav-menu.mobile-open {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+            /* スマホ用メニュー内の各タブボタンをGemini風のリスト項目に最適化 */
+            #nav-menu .tab-btn {
+                width: 100% !important;
+                text-align: left !important;
+                padding: 12px 16px !important;
+                border-radius: 9999px !important; /* 角丸ピル型 */
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                white-space: nowrap !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px;
+            }
         }
 
         /* --- えれサイト風 走行位置スタイル --- */
@@ -171,6 +199,9 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col relative">
 
+    <!-- 背景暗幕（スマホメニュー展開時） -->
+    <div id="menu-backdrop" onclick="toggleMenu()" class="fixed inset-0 bg-slate-950/60 z-40 hidden md:hidden transition-opacity"></div>
+
     <!-- ヘッダー -->
     <header class="bg-indigo-950 border-b border-indigo-800 p-4 shadow-lg flex justify-between items-center gap-4 relative z-50">
         <div class="flex items-center space-x-3">
@@ -192,6 +223,7 @@
                 <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="sync-status-text">同期待機中</span>
             </div>
+            
             <!-- 3本線メニューボタン -->
             <button onclick="toggleMenu()" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 p-2 rounded-lg text-white md:hidden transition flex items-center justify-center w-10 h-10 shadow">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,16 +231,41 @@
                 </svg>
             </button>
 
-            <!-- スマホ用オーバーレイメニュー（画面上部に綺麗に展開） -->
-            <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 md:space-x-1 sticky top-0 z-40 backdrop-blur shadow-md">
-                <button onclick="switchTab('about')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition bg-indigo-600 text-white shadow text-left md:text-center" data-tab="about">会社について</button>
-                <button onclick="switchTab('timetable')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="timetable">時刻表</button>
-                <button onclick="switchTab('operation')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="operation">走行位置</button>
-                <button onclick="switchTab('traininfo')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="traininfo">列車情報</button>
-                <button onclick="switchTab('addtrain')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="addtrain">列車追加</button>
-                <button onclick="switchTab('consist')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="consist">編成表</button>
-                <button onclick="switchTab('dia')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="dia">ダイヤ表</button>
-                <button onclick="switchTab('settings')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="settings">設定</button>
+            <!-- ナビゲーションメニュー（PCは横並び、スマホはGemini風サイドドロワー） -->
+            <nav id="nav-menu" class="hidden md:flex bg-slate-900 md:bg-transparent border-b md:border-b-0 border-slate-800 px-4 md:px-0 py-2 md:py-0 overflow-x-auto space-x-0 md:space-x-1 items-center">
+                <!-- スマホ用メニュー上部タイトル -->
+                <div class="flex md:hidden items-center justify-between pb-4 mb-2 border-b border-slate-800 w-full px-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">🚄</span>
+                        <span class="font-bold text-indigo-200 text-sm">メニュー</span>
+                    </div>
+                    <button onclick="toggleMenu()" class="text-slate-400 hover:text-white p-1">✕</button>
+                </div>
+
+                <button onclick="switchTab('about')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition bg-indigo-600 text-white shadow text-left md:text-center" data-tab="about">
+                    <span class="md:hidden">🏢</span> 会社について
+                </button>
+                <button onclick="switchTab('timetable')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="timetable">
+                    <span class="md:hidden">🕒</span> 時刻表
+                </button>
+                <button onclick="switchTab('operation')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="operation">
+                    <span class="md:hidden">📍</span> 走行位置
+                </button>
+                <button onclick="switchTab('traininfo')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="traininfo">
+                    <span class="md:hidden">🚆</span> 列車情報
+                </button>
+                <button onclick="switchTab('addtrain')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="addtrain">
+                    <span class="md:hidden">➕</span> 列車追加
+                </button>
+                <button onclick="switchTab('consist')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="consist">
+                    <span class="md:hidden">📋</span> 編成表
+                </button>
+                <button onclick="switchTab('dia')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="dia">
+                    <span class="md:hidden">📊</span> ダイヤ表
+                </button>
+                <button onclick="switchTab('settings')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="settings">
+                    <span class="md:hidden">⚙️</span> 設定
+                </button>
             </nav>
         </div>
     </header>
@@ -593,11 +650,12 @@
             { series: "S900系", items: ["S900-01 (事業用4両)", "S900-02 (事業用4両)"] }
         ];
 
-        /* スマホ向けメニューの展開・折りたたみ */
+        /* スマホ向けメニューの展開・折りたたみ (Gemini風サイドドロワー) */
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
+            const backdrop = document.getElementById('menu-backdrop');
             menu.classList.toggle('mobile-open');
-            menu.classList.toggle('hidden');
+            backdrop.classList.toggle('hidden');
         }
 
         function switchTab(tabId) {
@@ -616,8 +674,7 @@
             // スマホメニューが開いていたらタブ切り替え時に閉じる
             const menu = document.getElementById('nav-menu');
             if(menu.classList.contains('mobile-open')) {
-                menu.classList.remove('mobile-open');
-                menu.classList.add('hidden');
+                toggleMenu();
             }
 
             if (tabId === 'dia') renderMatrixTimetable();
@@ -779,13 +836,11 @@
             const depTime = document.getElementById('add-dep-time').value || "08:00";
             const arrTime = document.getElementById('add-arr-time').value || "09:30";
             
-            // 各種チェックボックスの状態取得
             const isCoupling = document.getElementById('check-coupling').checked;
             const isDecoupling = document.getElementById('check-decoupling').checked;
             const isChangeType = document.getElementById('check-changetype').checked;
             const changedType = isChangeType ? document.getElementById('add-changed-type').value : null;
 
-            // 各駅スケジュールデータの収集
             let schedule = {};
             document.querySelectorAll('.st-sched-row').forEach(row => {
                 const stId = row.getAttribute('data-stid');
