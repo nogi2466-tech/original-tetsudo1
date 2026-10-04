@@ -307,24 +307,22 @@
             </div>
         </div>
 
-        <!-- 4. 列車情報 -->
+        <!-- 4. 列車情報（列車番号順 / 運用番号順 切替対応） -->
         <div id="tab-traininfo" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">列車情報一覧（リアルタイム連動）</h2>
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <h2 class="text-xl font-bold text-indigo-200">列車情報一覧（リアルタイム連動）</h2>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs text-slate-400">表示モード:</label>
+                    <select id="train-view-mode" onchange="renderTrainInfoTable()" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs text-white font-medium">
+                        <option value="trainnum">列車番号順一覧</option>
+                        <option value="opnum">運用番号順一覧（時間順運用流れ）</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900 text-indigo-200 border-b border-slate-700">
-                            <tr>
-                                <th class="p-3">列車番号</th>
-                                <th class="p-3">運用番号</th>
-                                <th class="p-3">種別・区間ルール</th>
-                                <th class="p-3">行き先</th>
-                                <th class="p-3">両数・編成番号</th>
-                                <th class="p-3">状態</th>
-                            </tr>
-                        </thead>
-                        <tbody id="train-info-tbody" class="divide-y divide-slate-700 text-slate-300"></tbody>
-                    </table>
+                <div id="train-info-container" class="overflow-x-auto">
+                    <!-- 動的描画 -->
                 </div>
             </div>
         </div>
@@ -478,7 +476,7 @@
 
     </main>
 
-    <!-- 列車詳細ポップアップモーダル（要求されたすべての詳細情報＋停車駅・時刻一覧を表示） -->
+    <!-- 列車詳細ポップアップモーダル -->
     <div id="train-modal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="bg-slate-800 border border-indigo-700 p-6 rounded-2xl w-full max-w-lg space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
@@ -567,7 +565,7 @@
             trains: [
                 { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01 (10両)", status: "走行中", currentIdx: 10 },
                 { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01 (10両)", status: "走行中", currentIdx: 20 },
-                { id: 3, trainNum: "205M", opNum: "85K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", consistNum: "S3-05 (8両)", status: "停車中", currentIdx: 5 }
+                { id: 3, trainNum: "205M", opNum: "73K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", consistNum: "S3-05 (8両)", status: "停車中", currentIdx: 5 }
             ],
             eventDates: ["2026-10-15"]
         };
@@ -685,33 +683,120 @@
             switchTab('traininfo');
         }
 
+        /* --- 列車情報テーブル描画（列車番号順 / 運用番号順 切替対応） --- */
         function renderTrainInfoTable() {
-            const tbody = document.getElementById('train-info-tbody');
-            if(!tbody) return;
+            const container = document.getElementById('train-info-container');
+            const viewMode = document.getElementById('train-view-mode')?.value || 'trainnum';
+            if(!container) return;
 
             const trains = appData.trains || [];
             if(trains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">追加された列車はありません。</td></tr>`;
+                container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs">追加された列車はありません。</div>`;
                 return;
             }
 
-            tbody.innerHTML = trains.map(t => {
-                let badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-700";
-                if(t.status === "停車中") badgeColor = "bg-sky-950 text-sky-300 border border-sky-700";
-
-                const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
-
-                return `
-                    <tr class="hover:bg-slate-750 transition">
-                        <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
-                        <td class="p-3 font-mono">${t.opNum}</td>
-                        <td class="p-3">${t.type}</td>
-                        <td class="p-3 font-bold text-slate-200">${endName} 行</td>
-                        <td class="p-3 font-mono text-indigo-400">${t.consistNum || '-'}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
-                    </tr>
+            if(viewMode === 'trainnum') {
+                // 従来の列車番号順一覧
+                let html = `
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 text-indigo-200 border-b border-slate-700">
+                            <tr>
+                                <th class="p-3">列車番号</th>
+                                <th class="p-3">運用番号</th>
+                                <th class="p-3">種別・区間ルール</th>
+                                <th class="p-3">行き先</th>
+                                <th class="p-3">両数・編成番号</th>
+                                <th class="p-3">状態</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700 text-slate-300">
                 `;
-            }).join('');
+                trains.forEach(t => {
+                    let badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-700";
+                    if(t.status === "停車中") badgeColor = "bg-sky-950 text-sky-300 border border-sky-700";
+                    const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
+
+                    html += `
+                        <tr class="hover:bg-slate-750 transition">
+                            <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
+                            <td class="p-3 font-mono">${t.opNum}</td>
+                            <td class="p-3">${t.type}</td>
+                            <td class="p-3 font-bold text-slate-200">${endName} 行</td>
+                            <td class="p-3 font-mono text-indigo-400">${t.consistNum || '-'}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            } else {
+                // 運用番号順：左に運用番号、右に時間順でその運用番号で走る列車番号・種別・行き先を表示
+                // 運用ごとにグループ化
+                let opMap = {};
+                trains.forEach(t => {
+                    const op = t.opNum || '未割当';
+                    if(!opMap[op]) opMap[op] = [];
+                    opMap[op].push(t);
+                });
+
+                let html = `
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 text-indigo-200 border-b border-slate-700">
+                            <tr>
+                                <th class="p-3 w-32 border-r border-slate-700">運用番号</th>
+                                <th class="p-3">運用順・時間順 走行列車リスト（列車番号 / 種別 / 行き先）</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700 text-slate-300">
+                `;
+
+                for(let op in opMap) {
+                    let opTrains = opMap[op];
+                    // 時間順（列車番号順や配列順）にソート
+                    opTrains.sort((a,b) => a.trainNum.localeCompare(b.trainNum));
+
+                    html += `
+                        <tr class="hover:bg-slate-750 align-top">
+                            <td class="p-3 font-mono font-bold text-sky-300 text-sm bg-slate-900/50 border-r border-slate-700">
+                                <div class="bg-indigo-950 px-2 py-1 rounded border border-indigo-800 text-center">${op}</div>
+                                <div class="text-[10px] text-slate-400 mt-1 text-center font-normal">担当列車: ${opTrains.length}本</div>
+                            </td>
+                            <td class="p-3">
+                                <div class="space-y-2">
+                    `;
+
+                    opTrains.forEach((t, idx) => {
+                        const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
+                        const startName = allStationsMaster.find(s => s.id === t.startSt)?.name || t.startSt;
+                        const typeClass = `type-${t.type}`;
+
+                        html += `
+                            <div class="flex flex-wrap items-center justify-between bg-slate-900/70 p-2 rounded border border-slate-700/80 gap-2">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-xs font-mono text-slate-400">#${idx + 1}</span>
+                                    <span class="font-bold text-indigo-300 font-mono text-sm">${t.trainNum}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${typeClass}">${t.type}</span>
+                                </div>
+                                <div class="text-slate-200 font-medium">
+                                    ${startName}発 → <span class="text-indigo-200 font-bold">${endName}行</span>
+                                </div>
+                                <div class="text-[10px] text-indigo-400 font-mono bg-indigo-950 px-2 py-0.5 rounded border border-indigo-900">
+                                    編成: ${t.consistNum || '-'}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            }
         }
 
         function renderConsistMatrix() {
@@ -855,7 +940,7 @@
             checkEventDayStatus();
         }
 
-        /* --- 走行位置スクリプト（路線別切替・表示切替・リアルタイム連動） --- */
+        /* --- 走行位置スクリプト --- */
         function renderOperationTrack() {
             const containerParent = document.getElementById('track-container-parent');
             if(!containerParent) return;
@@ -863,7 +948,6 @@
             const selectedLine = document.getElementById('op-line-select').value;
             const viewMode = document.getElementById('op-view-mode').value;
 
-            // 路線ごとの駅フィルター
             let targetStations = allStationsMaster;
             if(selectedLine === 'main') {
                 targetStations = allStationsMaster.filter(st => {
@@ -911,12 +995,9 @@
             trains.forEach((t, i) => {
                 const currentStObj = allStationsMaster[t.currentIdx || 0] || allStationsMaster[0];
                 
-                // 選択された路線に含まれる駅にいるかチェック（全線表示以外の場合）
                 if(selectedLine !== 'all') {
                     const exists = targetStations.some(st => st.id === currentStObj.id);
-                    if(!exists) return; // この路線に該当しない列車はスキップ
-                    
-                    // 表示位置のインデックスを再計算
+                    if(!exists) return;
                     t.filteredIdx = targetStations.findIndex(st => st.id === currentStObj.id);
                 } else {
                     t.filteredIdx = allStationsMaster.findIndex(st => st.id === currentStObj.id);
@@ -967,7 +1048,7 @@
             containerParent.innerHTML = html;
         }
 
-        /* --- 列車詳細モーダル（すべての要望項目＋停車駅・時刻一覧を表示） --- */
+        /* --- 列車詳細モーダル --- */
         function openTrainModal(train) {
             const modal = document.getElementById('train-modal');
             const numEl = document.getElementById('modal-train-num');
@@ -981,7 +1062,6 @@
             const curStName = allStationsMaster[train.currentIdx || 0]?.name || '不明';
             const startStName = allStationsMaster.find(s => s.id === train.startSt)?.name || train.startSt;
 
-            // 停車駅リストの作成
             const stopsLists = officialStopsMaster[train.type] || officialStopsMaster["普通"];
             const stopIds = stopsLists[0];
 
@@ -1057,7 +1137,7 @@
                             if(t.currentIdx === undefined) t.currentIdx = 0;
                             t.currentIdx = (t.currentIdx + 1) % allStationsMaster.length;
                         });
-                        pushData(); // Firebaseにリアルタイム保存し全画面・全端末に同期
+                        pushData();
                         updateUI();
                     }
                 }, 2500);
