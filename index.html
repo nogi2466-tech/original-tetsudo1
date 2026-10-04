@@ -132,11 +132,13 @@
             align-items: center;
             gap: 6px;
         }
+        /* 左側：上り列車 */
         .v-train.up-train {
             right: calc(50% + 25px);
             flex-direction: row-reverse;
             text-align: right;
         }
+        /* 右側：下り列車 */
         .v-train.down-train {
             left: calc(50% + 25px);
             flex-direction: row;
@@ -671,7 +673,7 @@
                 targetBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
             }
 
-            // スマホメニューが開いていたらタブ切り替え時に閉じる
+            // スマホメニューが開いたらタブ切り替え時に閉じる
             const menu = document.getElementById('nav-menu');
             if(menu.classList.contains('mobile-open')) {
                 toggleMenu();
@@ -1168,7 +1170,7 @@
             return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         }
 
-        /* --- 走行位置スクリプト（完全自動時間連動版） --- */
+        /* --- 走行位置スクリプト（完全自動時間連動・上下線位置修正版） --- */
         function renderOperationTrack() {
             const containerParent = document.getElementById('track-container-parent');
             if(!containerParent) return;
@@ -1223,29 +1225,27 @@
             const now = new Date();
             const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
-            trains.forEach((t, i) => {
-                if (t.depTime && t.arrTime) {
-                    const depMin = timeToMinutes(t.depTime);
-                    const arrMin = timeToMinutes(t.arrTime);
-                    if (currentMinutes < depMin || currentMinutes > arrMin) {
-                        return;
-                    }
-
-                    const totalDuration = Math.max(1, arrMin - depMin);
-                    const elapsed = currentMinutes - depMin;
-                    const progressRate = Math.max(0, Math.min(1, elapsed / totalDuration));
-
-                    let sIdx = allStationsMaster.findIndex(s => s.id === t.startSt);
-                    let eIdx = allStationsMaster.findIndex(s => s.id === t.endSt);
-                    if(sIdx === -1) sIdx = 0;
-                    if(eIdx === -1) eIdx = allStationsMaster.length - 1;
-
-                    const stationCountSpan = Math.abs(eIdx - sIdx);
-                    const calculatedStationPosIdx = sIdx + (eIdx > sIdx ? progressRate * stationCountSpan : -progressRate * stationCountSpan);
-                    t._realtimeStationIdx = calculatedStationPosIdx;
-                } else {
-                    t._realtimeStationIdx = 0;
+            trains.forEach((t) => {
+                // 1. 運行時間外（出発前、または到着後）の場合は非表示にする
+                if (!t.depTime || !t.arrTime) return;
+                const depMin = timeToMinutes(t.depTime);
+                const arrMin = timeToMinutes(t.arrTime);
+                if (currentMinutes < depMin || currentMinutes > arrMin) {
+                    return; // 時間外なのでスキップ
                 }
+
+                const totalDuration = Math.max(1, arrMin - depMin);
+                const elapsed = currentMinutes - depMin;
+                const progressRate = Math.max(0, Math.min(1, elapsed / totalDuration));
+
+                let sIdx = allStationsMaster.findIndex(s => s.id === t.startSt);
+                let eIdx = allStationsMaster.findIndex(s => s.id === t.endSt);
+                if(sIdx === -1) sIdx = 0;
+                if(eIdx === -1) eIdx = allStationsMaster.length - 1;
+
+                const stationCountSpan = Math.abs(eIdx - sIdx);
+                const calculatedStationPosIdx = sIdx + (eIdx > sIdx ? progressRate * stationCountSpan : -progressRate * stationCountSpan);
+                t._realtimeStationIdx = calculatedStationPosIdx;
 
                 const floorIdx = Math.floor(t._realtimeStationIdx);
                 const currentStObj = allStationsMaster[floorIdx] || allStationsMaster[0];
@@ -1262,7 +1262,12 @@
                 const decimalPart = t._realtimeStationIdx - floorIdx;
                 const topPos = 40 + ((t.filteredIdx + decimalPart) * spacing);
 
-                const isUp = (i % 2 === 0);
+                // 2. 上り・下りの判定：始発駅のインデックス vs 終着駅のインデックスで正確に判定
+                //   起点から終点へ向かう方向が数値増（下り）か数値減（上り）かを判定
+                const isDownTrain = eIdx >= sIdx; 
+                // 下りなら右側 (down-train)、上りなら左側 (up-train)
+                const trainClass = isDownTrain ? 'down-train' : 'up-train';
+
                 const destName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
                 const typeClass = `type-${t.type}`;
                 const opNum = t.opNum || '73K';
@@ -1270,7 +1275,7 @@
 
                 if(viewMode === 'card') {
                     html += `
-                        <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
+                        <div class="v-train ${trainClass}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
                             <div class="train-icon-badge">
                                 <div class="train-op-num">${opNum}</div>
                                 <span class="train-type-tag ${typeClass}">${t.type}</span>
@@ -1284,7 +1289,7 @@
                     `;
                 } else if(viewMode === 'icon') {
                     html += `
-                        <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
+                        <div class="v-train ${trainClass}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
                             <div class="train-icon-badge" title="${t.trainNum}: ${t.type} (${currentStObj.name})">
                                 <div class="train-op-num">${opNum}</div>
                                 <span class="train-type-tag ${typeClass}">${t.trainNum}</span>
@@ -1293,7 +1298,7 @@
                     `;
                 } else {
                     html += `
-                        <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
+                        <div class="v-train ${trainClass}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
                             <span class="bg-slate-900 text-indigo-200 border border-indigo-700 px-2 py-1 rounded text-[10px] font-bold font-mono">
                                 ${t.trainNum} (${t.type}) - ${currentStObj.name}付近
                             </span>
