@@ -38,7 +38,7 @@
                 <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="sync-status-text">同期待機中</span>
             </div>
-            <!-- 3本線メニューボタン（端に配置） -->
+            <!-- 3本線メニューボタン -->
             <button onclick="toggleMenu()" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 p-2 rounded-lg text-white md:hidden transition flex items-center justify-center w-10 h-10 shadow">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <!-- 5. 列車追加 (正式停車駅・完全編成対応版) -->
+        <!-- 5. 列車追加 (チェック式作業設定・停車駅リアルタイム連動) -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
@@ -245,32 +245,56 @@
                     </div>
                 </div>
 
-                <!-- 運用作業設定（種別変更・分割・併結） -->
-                <div class="border border-indigo-900/60 bg-indigo-950/20 p-4 rounded-lg space-y-3">
-                    <span class="text-xs text-indigo-300 font-bold block">⚙️ 途中駅での種別変更・分割・併結の設定</span>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">作業種別</label>
-                            <select id="add-op-action" onchange="toggleActionDetail()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-                                <option value="none">なし（通し運転）</option>
-                                <option value="typechange">途中駅から種別変更</option>
-                                <option value="uncouple">途中駅で後部編成を分割</option>
-                                <option value="couple">途中駅で後部編成を併結</option>
-                            </select>
+                <!-- 途中駅作業（チェック式設定） -->
+                <div class="border border-indigo-900/60 bg-indigo-950/20 p-4 rounded-lg space-y-4">
+                    <span class="text-xs text-indigo-300 font-bold block">⚙️ 途中駅での種別変更・分割・連結作業設定（チェック式）</span>
+                    
+                    <!-- 種別変更設定 -->
+                    <div class="space-y-2 bg-slate-900 p-3 rounded border border-slate-700">
+                        <label class="flex items-center space-x-2 text-xs text-indigo-200 cursor-pointer font-bold">
+                            <input type="checkbox" id="chk-typechange" onchange="toggleActionCheckboxes()" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
+                            <span>途中駅から種別を変更する</span>
+                        </label>
+                        <div id="box-typechange" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 hidden">
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">変更駅</label>
+                                <select id="tc-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">変更後の種別</label>
+                                <select id="tc-newtype" onchange="updateStationSchedulePreview()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                    <option value="普通">普通</option>
+                                    <option value="準急">準急</option>
+                                    <option value="快速">快速</option>
+                                    <option value="急行">急行</option>
+                                    <option value="特急">特急</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">対象駅</label>
-                            <select id="add-action-station" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white"></select>
-                        </div>
-                        <div id="action-detail-wrap">
-                            <label class="block text-xs text-slate-400 mb-1" id="action-detail-label">変更後種別</label>
-                            <select id="add-action-detail" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-                                <option value="普通">普通</option>
-                                <option value="準急">準急</option>
-                                <option value="快速">快速</option>
-                                <option value="急行">急行</option>
-                                <option value="特急">特急</option>
-                            </select>
+                    </div>
+
+                    <!-- 分割・連結設定 -->
+                    <div class="space-y-2 bg-slate-900 p-3 rounded border border-slate-700">
+                        <label class="flex items-center space-x-2 text-xs text-indigo-200 cursor-pointer font-bold">
+                            <input type="checkbox" id="chk-coupling" onchange="toggleActionCheckboxes()" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
+                            <span>途中駅で編成の切り離し（分割）または連結を行う</span>
+                        </label>
+                        <div id="box-coupling" class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 hidden">
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">作業種別</label>
+                                <select id="cp-action" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                    <option value="uncouple">後部編成を切り離し（分割）</option>
+                                    <option value="couple">後部編成を連結</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">対象駅</label>
+                                <select id="cp-station" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-1">対象編成 / 列車番号</label>
+                                <input type="text" id="cp-detail" value="S4-01 または 101M-2" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -286,9 +310,9 @@
                     </div>
                 </div>
 
-                <!-- 停車駅プレビュー（正式定義の停車駅リストに完全準拠） -->
+                <!-- 停車駅プレビュー -->
                 <div class="space-y-2">
-                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間（正式パターン自動適用）</span>
+                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間（種別変更・停車駅が自動反映されます）</span>
                     <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-64 overflow-y-auto text-xs space-y-2">
                         <p class="text-slate-400">始点・終点を選択すると停車駅と時間設定欄が展開されます。</p>
                     </div>
@@ -347,7 +371,6 @@
             {id: "56", name: "紫句守展望台"}, {id: "57", name: "句守星見台"}, {id: "58", name: "紫句守森林公園"}, {id: "59", name: "紫句守詩碑前"}, {id: "60", name: "紫句守詩碑"}
         ];
 
-        // 各種別の正式停車駅マスター定義
         const officialStopsMaster = {
             "特急": [
                 ["1", "3", "13", "16", "17", "23", "28", "30"],
@@ -482,7 +505,6 @@
                     } else {
                         dbRef.set(appData);
                     }
-                    handleUrlQueryAction();
                 });
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 document.getElementById('sync-status-text').innerText = "同期中";
@@ -490,25 +512,6 @@
             } catch(e) {
                 document.getElementById('sync-status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
                 document.getElementById('sync-status-text').innerText = "同期エラー";
-            }
-        }
-
-        function handleUrlQueryAction() {
-            const params = new URLSearchParams(window.location.search);
-            const targetTrainNum = params.get('train');
-            const newStatus = params.get('status');
-
-            if (targetTrainNum && newStatus && appData.trains) {
-                let updated = false;
-                appData.trains.forEach(t => {
-                    if (t.trainNum === targetTrainNum && t.status !== newStatus) {
-                        t.status = newStatus;
-                        updated = true;
-                    }
-                });
-                if (updated) {
-                    pushData();
-                }
             }
         }
 
@@ -526,7 +529,8 @@
             const options = allStationsMaster.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
             document.getElementById('add-start-station').innerHTML = options;
             document.getElementById('add-end-station').innerHTML = options;
-            document.getElementById('add-action-station').innerHTML = options;
+            document.getElementById('tc-station').innerHTML = options;
+            document.getElementById('cp-station').innerHTML = options;
             document.getElementById('add-end-station').value = "30";
             updateStationSchedulePreview();
         }
@@ -550,27 +554,23 @@
             }
         }
 
-        function toggleActionDetail() {
-            const action = document.getElementById('add-op-action').value;
-            const detailWrap = document.getElementById('action-detail-wrap');
-            const label = document.getElementById('action-detail-label');
-            const detailSel = document.getElementById('add-action-detail');
-
-            if(action === 'none') {
-                detailWrap.style.display = 'none';
+        function toggleActionCheckboxes() {
+            const chkType = document.getElementById('chk-typechange').checked;
+            const boxType = document.getElementById('box-typechange');
+            if(chkType) {
+                boxType.classList.remove('hidden');
             } else {
-                detailWrap.style.display = 'block';
-                if(action === 'typechange') {
-                    label.innerText = '変更後種別';
-                    detailSel.innerHTML = `<option value="普通">普通</option><option value="準急">準急</option><option value="快速">快速</option><option value="急行">急行</option><option value="特急">特急</option>`;
-                } else if(action === 'uncouple') {
-                    label.innerText = '分割後の後部列車番号';
-                    detailSel.innerHTML = `<input type="text" id="add-action-detail" value="101M-2" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">`;
-                } else if(action === 'couple') {
-                    label.innerText = '併結する編成';
-                    detailSel.innerHTML = `<option value="S1-06">S1-06 (8両)</option><option value="S2-05">S2-05 (10両)</option>`;
-                }
+                boxType.classList.add('hidden');
             }
+
+            const chkCp = document.getElementById('chk-coupling').checked;
+            const boxCp = document.getElementById('box-coupling');
+            if(chkCp) {
+                boxCp.classList.remove('hidden');
+            } else {
+                boxCp.classList.add('hidden');
+            }
+            updateStationSchedulePreview();
         }
 
         function updateStationSchedulePreview() {
@@ -578,9 +578,11 @@
             const patternIdx = parseInt(document.getElementById('add-pattern-index').value) || 0;
             const startId = document.getElementById('add-start-station').value;
             const endId = document.getElementById('add-end-station').value;
-            const opAction = document.getElementById('add-op-action').value;
-            const actionStId = document.getElementById('add-action-station').value;
             
+            const chkType = document.getElementById('chk-typechange').checked;
+            const tcStation = document.getElementById('tc-station').value;
+            const tcNewType = document.getElementById('tc-newtype').value;
+
             const sIdx = allStationsMaster.findIndex(s => s.id === startId);
             const eIdx = allStationsMaster.findIndex(s => s.id === endId);
             const preview = document.getElementById('station-schedule-preview');
@@ -591,9 +593,10 @@
                 return;
             }
 
-            // 正式停車駅のリストを取得
-            const stopsLists = officialStopsMaster[trainType] || officialStopsMaster["普通"];
-            const currentStopIds = stopsLists[patternIdx % stopsLists.length] || stopsLists[0];
+            // 初期種別の停車駅リストを取得
+            let currentType = trainType;
+            let stopsLists = officialStopsMaster[currentType] || officialStopsMaster["普通"];
+            let currentStopIds = stopsLists[patternIdx % stopsLists.length] || stopsLists[0];
 
             let html = `<table class="w-full text-left border-collapse">
                 <thead>
@@ -609,15 +612,15 @@
             let passedActionStation = false;
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = allStationsMaster[i];
-                if(st.id === actionStId) passedActionStation = true;
 
-                let currentType = trainType;
-                const changeTypeVal = document.getElementById('add-action-detail')?.value;
-                if(opAction === 'typechange' && passedActionStation && changeTypeVal) {
-                    currentType = changeTypeVal;
+                // 変更駅に到達したら種別を切り替え、新しい種別の停車パターンに再適用する
+                if(chkType && st.id === tcStation) {
+                    passedActionStation = true;
+                    currentType = tcNewType;
+                    stopsLists = officialStopsMaster[currentType] || officialStopsMaster["普通"];
+                    currentStopIds = stopsLists[patternIdx % stopsLists.length] || stopsLists[0];
                 }
 
-                // 正式リストに含まれるか、始発・終着なら停車
                 const isExplicitStop = currentStopIds.includes(st.id);
                 const isStartOrEnd = (i === sIdx || i === eIdx);
                 const stopping = isExplicitStop || isStartOrEnd;
@@ -661,9 +664,28 @@
                 consistStr = `${consistStr} ＋ ${c2} (併結)`;
             }
 
-            const opAction = document.getElementById('add-op-action').value;
-            const actionStation = document.getElementById('add-action-station').value;
-            const actionDetail = document.getElementById('add-action-detail').value;
+            const chkType = document.getElementById('chk-typechange').checked;
+            const tcStation = document.getElementById('tc-station').value;
+            const tcNewType = document.getElementById('tc-newtype').value;
+
+            const chkCp = document.getElementById('chk-coupling').checked;
+            const cpAction = document.getElementById('cp-action').value;
+            const cpStation = document.getElementById('cp-station').value;
+            const cpDetail = document.getElementById('cp-detail').value;
+
+            let opAction = 'none';
+            let actionStation = '';
+            let actionDetail = '';
+
+            if(chkType) {
+                opAction = 'typechange';
+                actionStation = tcStation;
+                actionDetail = tcNewType;
+            } else if(chkCp) {
+                opAction = cpAction; // uncouple or couple
+                actionStation = cpStation;
+                actionDetail = cpDetail;
+            }
 
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -715,13 +737,13 @@
                 let typeDisplay = t.type;
                 if(t.opAction === 'typechange') {
                     const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
-                    typeDisplay = `${t.type} (※${stName}から${t.actionDetail}に変更)`;
+                    typeDisplay = `${t.type} → ${stName}から${t.actionDetail}に変更`;
                 } else if(t.opAction === 'uncouple') {
                     const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
-                    typeDisplay = `${t.type} (※${stName}で分割)`;
+                    typeDisplay = `${t.type} (${stName}で分割)`;
                 } else if(t.opAction === 'couple') {
                     const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
-                    typeDisplay = `${t.type} (※${stName}で併結)`;
+                    typeDisplay = `${t.type} (${stName}で連結)`;
                 }
 
                 return `
@@ -849,10 +871,11 @@
             const container = document.getElementById('route-map-stations');
             const titleBanner = document.getElementById('line-title-banner');
             if(!container) return;
-            const lineInfo = linesData[currentActiveLine];
-            titleBanner.innerText = `${lineInfo.name} 運行モニター（全${lineInfo.stations.length}駅）`;
+            // 簡易マップ表示用に本線データを割り当て
+            const stations = allStationsMaster.slice(8, 30);
+            titleBanner.innerText = `紫雲本線 運行モニター（全${stations.length}駅）`;
 
-            container.innerHTML = lineInfo.stations.map((st) => {
+            container.innerHTML = stations.map((st) => {
                 const trains = (appData.trains || []).filter(t => t.stationId === st.id);
                 return `
                     <div class="relative flex items-center justify-between">
