@@ -388,7 +388,8 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                dbRef = firebase.database().ref('shinomori_railway_v8');
+                // 固定のデータベースキーに変更し、データが消えないように修正
+                dbRef = firebase.database().ref('shinomori_railway_master');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if(val) {
