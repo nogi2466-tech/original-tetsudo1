@@ -149,10 +149,9 @@
                             <tr>
                                 <th class="p-3">列車番号</th>
                                 <th class="p-3">運用番号</th>
-                                <th class="p-3">種別</th>
+                                <th class="p-3">種別 (区間)</th>
                                 <th class="p-3">行き先</th>
-                                <th class="p-3">両数</th>
-                                <th class="p-3">編成番号</th>
+                                <th class="p-3">編成構成</th>
                                 <th class="p-3">状態</th>
                             </tr>
                         </thead>
@@ -162,7 +161,7 @@
             </div>
         </div>
 
-        <!-- 5. 列車追加 -->
+        <!-- 5. 列車追加 (本格・高度運用対応版) -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
@@ -187,13 +186,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">種別</label>
-                        <select id="add-train-type" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option>特急</option><option>通勤急行</option><option>急行</option><option>通勤快速</option><option>快速</option><option>準急</option><option>普通</option>
-                        </select>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">路線名</label>
                         <select id="add-train-line" onchange="updateAddStationDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
@@ -205,56 +198,78 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">両数構成</label>
-                        <select id="add-cars-count" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option>10両</option><option>8両</option><option>6両</option><option>4両</option><option>4＋4両</option><option>4＋6両</option>
+                        <label class="block text-xs text-slate-400 mb-1">基本種別</label>
+                        <select id="add-train-type" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="特急">特急 (主要駅停車)</option>
+                            <option value="通勤急行">通勤急行</option>
+                            <option value="急行">急行</option>
+                            <option value="通勤快速">通勤快速</option>
+                            <option value="快速">快速</option>
+                            <option value="準急">準急</option>
+                            <option value="普通">普通 (全駅停車)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- 列車編成選択 -->
+                <!-- 編成モード（単行 or 連結・併結） -->
                 <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
-                    <span class="text-xs text-indigo-300 font-bold block">列車編成（形式と編成番号）</span>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">形式</label>
-                            <select id="consist-series" onchange="updateConsistNumbers()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-                                <option value="S1">S1系 (01-05:10両 / 06-10:8両)</option>
-                                <option value="S2">S2系 (01-15:10両 / 16-25:8両)</option>
-                                <option value="S3">S3系 (10/8/6/4両)</option>
-                                <option value="S4">S4系 (10/8/6両)</option>
-                                <option value="S5">S5系 (01-04:10両)</option>
-                                <option value="S100" selected>S100系 特急 (10/6/4両)</option>
-                                <option value="S900">S900系 事業用 (4両)</option>
-                            </select>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-indigo-300 font-bold">編成構成（単行 または 2編成併結）</span>
+                        <select id="consist-mode" onchange="toggleConsistMode()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                            <option value="single">単行編成（1本）</option>
+                            <option value="double">併結編成（前部＋後部 2編成）</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <!-- 編成1 (前部) -->
+                        <div class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700">
+                            <span class="text-[11px] text-indigo-300 font-bold block">【編成1 / 前部編成】</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="consist-series-1" onchange="updateConsistNumbers(1)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                    <option value="S1">S1系</option><option value="S2">S2系</option><option value="S3">S3系</option><option value="S4">S4系</option><option value="S5">S5系</option><option value="S100" selected>S100系</option><option value="S900">S900系</option>
+                                </select>
+                                <select id="consist-number-1" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">編成番号</label>
-                            <select id="consist-number-sel" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white"></select>
+                        <!-- 編成2 (後部) ※初期非表示 -->
+                        <div id="consist-2-container" class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700 hidden">
+                            <span class="text-[11px] text-sky-300 font-bold block">【編成2 / 後部編成】</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="consist-series-2" onchange="updateConsistNumbers(2)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                    <option value="S1">S1系</option><option value="S2">S2系</option><option value="S3">S3系</option><option value="S4" selected>S4系</option><option value="S5">S5系</option><option value="S100">S100系</option>
+                                </select>
+                                <select id="consist-number-2" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 併結・分割・種別変更などの詳細運行設定 -->
+                <!-- 運用作業設定（種別変更・分割・併結など） -->
                 <div class="border border-indigo-900/60 bg-indigo-950/20 p-4 rounded-lg space-y-3">
-                    <span class="text-xs text-indigo-300 font-bold block">🔗 連結・分割・種別変更 詳細オプション</span>
+                    <span class="text-xs text-indigo-300 font-bold block">⚙️ 運用作業設定（途中駅での種別変更・分割・併結）</span>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">作業種別</label>
-                            <select id="add-op-action" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-                                <option value="none">なし（通常運行）</option>
-                                <option value="couple">併結（連結）作業</option>
-                                <option value="uncouple">分割（切り離し）作業</option>
-                                <option value="typechange">途中駅での種別変更</option>
+                            <select id="add-op-action" onchange="toggleActionDetail()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                                <option value="none">なし（通し運転）</option>
+                                <option value="typechange">途中駅から種別変更</option>
+                                <option value="uncouple">途中駅で後部編成を分割</option>
+                                <option value="couple">途中駅で後部編成を併結</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">対象駅</label>
+                            <label class="block text-xs text-slate-400 mb-1">対象駅（変更・作業駅）</label>
                             <select id="add-action-station" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white"></select>
                         </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">変更後種別 / 連結編成</label>
-                            <input type="text" id="add-action-detail" placeholder="例: 快速 / S1-06" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                        <div id="action-detail-wrap">
+                            <label class="block text-xs text-slate-400 mb-1" id="action-detail-label">変更後種別</label>
+                            <select id="add-action-detail" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                                <option value="普通">普通</option>
+                                <option value="快速">快速</option>
+                                <option value="急行">急行</option>
+                                <option value="特急">特急</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -270,9 +285,9 @@
                     </div>
                 </div>
 
-                <!-- 停車駅・時間設定プレビューエリア -->
+                <!-- 停車駅・時間設定プレビューエリア（種別に応じた停車・通過フラグ付き） -->
                 <div class="space-y-2">
-                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間設定</span>
+                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間・停車/通過設定</span>
                     <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-64 overflow-y-auto text-xs space-y-2">
                         <p class="text-slate-400">始点・終点を選択すると停車駅と時間設定欄が展開されます。</p>
                     </div>
@@ -288,7 +303,7 @@
             <div id="consist-matrix-container" class="space-y-4"></div>
         </div>
 
-        <!-- 7. ダイヤ表（紙の時刻表風：左に駅名、上に列車番号と種別） -->
+        <!-- 7. ダイヤ表 -->
         <div id="tab-dia" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">ダイヤ表（紙の時刻表風マトリクス）</h2>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 overflow-x-auto shadow-xl">
@@ -476,21 +491,68 @@
             updateStationSchedulePreview();
         }
 
-        function updateConsistNumbers() {
-            const series = document.getElementById('consist-series').value;
-            const sel = document.getElementById('consist-number-sel');
+        function toggleConsistMode() {
+            const mode = document.getElementById('consist-mode').value;
+            const c2Container = document.getElementById('consist-2-container');
+            if(mode === 'double') {
+                c2Container.classList.remove('hidden');
+            } else {
+                c2Container.classList.add('hidden');
+            }
+        }
+
+        function updateConsistNumbers(num) {
+            const series = document.getElementById(`consist-series-${num}`).value;
+            const sel = document.getElementById(`consist-number-${num}`);
             let found = fullConsistsData.find(c => c.series.startsWith(series));
             if(found) {
                 sel.innerHTML = found.items.map(it => `<option>${it}</option>`).join('');
             }
         }
 
+        function toggleActionDetail() {
+            const action = document.getElementById('add-op-action').value;
+            const detailWrap = document.getElementById('action-detail-wrap');
+            const label = document.getElementById('action-detail-label');
+            const detailSel = document.getElementById('add-action-detail');
+
+            if(action === 'none') {
+                detailWrap.style.display = 'none';
+            } else {
+                detailWrap.style.display = 'block';
+                if(action === 'typechange') {
+                    label.innerText = '変更後種別';
+                    detailSel.innerHTML = `<option value="普通">普通</option><option value="準急">準急</option><option value="快速">快速</option><option value="急行">急行</option><option value="特急">特急</option>`;
+                } else if(action === 'uncouple') {
+                    label.innerText = '分割後の後ろの列車番号';
+                    detailSel.innerHTML = `<input type="text" id="add-action-detail" value="101M-2" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">`;
+                } else if(action === 'couple') {
+                    label.innerText = '併結する追加編成';
+                    detailSel.innerHTML = `<option value="S1-06">S1-06 (8両)</option><option value="S2-05">S2-05 (10両)</option>`;
+                }
+            }
+        }
+
+        // 種別に応じた停車判定ロジック (特急は主要駅のみ、普通は全駅など)
+        function isStationStopping(trainType, stationId, index, totalCount) {
+            if(trainType === '普通') return true;
+            if(index === 0 || index === totalCount - 1) return true; // 始発・終着は必ず停車
+            const n = parseInt(stationId);
+            if(isNaN(n)) return true;
+            if(trainType === '特急') return n % 5 === 0 || n === 1; // 5の倍数の主要駅
+            if(trainType === '急行' || trainType === '快速') return n % 3 === 0 || n === 1;
+            return true;
+        }
+
         function updateStationSchedulePreview() {
             const lineKey = document.getElementById('add-train-line').value;
             const startId = document.getElementById('add-start-station').value;
             const endId = document.getElementById('add-end-station').value;
-            const stations = linesData[lineKey].stations;
+            const trainType = document.getElementById('add-train-type').value;
+            const opAction = document.getElementById('add-op-action').value;
+            const actionStId = document.getElementById('add-action-station').value;
             
+            const stations = linesData[lineKey].stations;
             const sIdx = stations.findIndex(s => s.id === startId);
             const eIdx = stations.findIndex(s => s.id === endId);
             const preview = document.getElementById('station-schedule-preview');
@@ -501,11 +563,10 @@
                 return;
             }
 
-            // 作業用駅のセレクトボックスも更新
             const actionStationSel = document.getElementById('add-action-station');
             let actionOptions = '';
             for(let i = sIdx; i <= eIdx; i++) {
-                actionOptions += `<option value="${stations[i].id}">${stations[i].id}. ${stations[i].name}</option>`;
+                actionOptions += `<option value="${stations[i].id}" ${stations[i].id === actionStId ? 'selected' : ''}>${stations[i].id}. ${stations[i].name}</option>`;
             }
             actionStationSel.innerHTML = actionOptions;
 
@@ -513,14 +574,27 @@
                 <thead>
                     <tr class="text-indigo-300 border-b border-slate-800 text-[11px]">
                         <th class="p-2">停車駅名</th>
+                        <th class="p-2">種別 (適用区間)</th>
                         <th class="p-2">到着時刻</th>
                         <th class="p-2">発車時刻</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800">`;
             
+            let passedActionStation = false;
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = stations[i];
+                if(st.id === actionStId) passedActionStation = true;
+
+                // 種別変更がある場合、アクション駅以降は変更後種別を適用
+                let currentType = trainType;
+                const changeTypeVal = document.getElementById('add-action-detail')?.value;
+                if(opAction === 'typechange' && passedActionStation && changeTypeVal) {
+                    currentType = changeTypeVal;
+                }
+
+                const stopping = isStationStopping(currentType, st.id, i - sIdx, (eIdx - sIdx + 1));
+                
                 let baseHour = 8;
                 let baseMin = 10 + (i - sIdx) * 3;
                 if(baseMin >= 60) {
@@ -535,8 +609,9 @@
                 html += `
                     <tr>
                         <td class="p-2 font-bold text-slate-200">${st.id}. ${st.name}</td>
-                        <td class="p-2"><input type="text" value="${isStart ? '-' : timeStr}" class="arr-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
-                        <td class="p-2"><input type="text" value="${isEnd ? '-' : timeStr}" class="dep-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
+                        <td class="p-2"><span class="px-1.5 py-0.5 rounded text-[10px] ${stopping ? 'bg-indigo-950 text-indigo-300 border border-indigo-800' : 'bg-slate-800 text-slate-500'}">${stopping ? currentType : '通過'}</span></td>
+                        <td class="p-2"><input type="text" value="${isStart ? '-' : (stopping ? timeStr : '通過')}" class="arr-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
+                        <td class="p-2"><input type="text" value="${isEnd ? '-' : (stopping ? timeStr : '通過')}" class="dep-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
                     </tr>
                 `;
             }
@@ -549,19 +624,24 @@
             const opNum = document.getElementById('add-op-num').value;
             const type = document.getElementById('add-train-type').value;
             const runDay = document.getElementById('add-run-day').value;
-            const carsCount = document.getElementById('add-cars-count').value;
             const line = document.getElementById('add-train-line').value;
             const startSt = document.getElementById('add-start-station').value;
             const endSt = document.getElementById('add-end-station').value;
-            const series = document.getElementById('consist-series').value;
-            const consistNumFull = document.getElementById('consist-number-sel').value;
             
-            // 併結・分割・種別変更オプション
+            const consistMode = document.getElementById('consist-mode').value;
+            const c1Full = document.getElementById('consist-number-1').value;
+            const c1 = c1Full ? c1Full.split(' ')[0] : 'S100-01';
+            let consistStr = c1;
+
+            if(consistMode === 'double') {
+                const c2Full = document.getElementById('consist-number-2').value;
+                const c2 = c2Full ? c2Full.split(' ')[0] : 'S4-01';
+                consistStr = `${c1} ＋ ${c2} (併結)`;
+            }
+
             const opAction = document.getElementById('add-op-action').value;
             const actionStation = document.getElementById('add-action-station').value;
             const actionDetail = document.getElementById('add-action-detail').value;
-
-            const consistNumOnly = consistNumFull ? consistNumFull.split(' ')[0] : series;
 
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -576,8 +656,7 @@
                 line,
                 startSt,
                 endSt,
-                cars: carsCount,
-                consistNum: consistNumOnly,
+                consistNum: consistStr,
                 opAction,
                 actionStation,
                 actionDetail,
@@ -597,7 +676,7 @@
 
             const trains = appData.trains || [];
             if(trains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500">追加された列車はありません。「列車追加」タブから登録してください。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">追加された列車はありません。「列車追加」タブから登録してください。</td></tr>`;
                 return;
             }
 
@@ -611,31 +690,25 @@
                 if(t.status === "運行なし") badgeColor = "bg-slate-800 text-slate-500";
 
                 const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
-                let carsVal = t.cars || "10両";
-                let consistVal = t.consistNum || "-";
-                if(carsVal.includes("(") && !t.consistNum) {
-                    const parts = carsVal.split('(');
-                    carsVal = parts[0].trim();
-                    consistVal = parts[1] ? parts[1].replace(')', '').trim() : '-';
-                }
-
-                // 併結・分割のバッジ表示用情報
-                let actionBadge = '';
-                if(t.opAction && t.opAction !== 'none') {
+                let typeDisplay = t.type;
+                if(t.opAction === 'typechange') {
                     const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
-                    if(t.opAction === 'couple') actionBadge = `<div class="text-[10px] text-amber-300">🔗 ${stName}で併結:${t.actionDetail || ''}</div>`;
-                    if(t.opAction === 'uncouple') actionBadge = `<div class="text-[10px] text-sky-300">✂️ ${stName}で分割</div>`;
-                    if(t.opAction === 'typechange') actionBadge = `<div class="text-[10px] text-purple-300">🔄 ${stName}で${t.actionDetail || ''}に変更</div>`;
+                    typeDisplay = `${t.type} → ${stName}から${t.actionDetail}`;
+                } else if(t.opAction === 'uncouple') {
+                    const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
+                    typeDisplay = `${t.type} (${stName}で後部分割)`;
+                } else if(t.opAction === 'couple') {
+                    const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
+                    typeDisplay = `${t.type} (${stName}で併結)`;
                 }
 
                 return `
                     <tr class="hover:bg-slate-750 transition">
                         <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
                         <td class="p-3 font-mono">${t.opNum}</td>
-                        <td class="p-3">${t.type}</td>
-                        <td class="p-3 font-bold text-slate-200">${endName} 行 ${actionBadge}</td>
-                        <td class="p-3">${carsVal}</td>
-                        <td class="p-3 font-mono text-indigo-400">${consistVal}</td>
+                        <td class="p-3">${typeDisplay}</td>
+                        <td class="p-3 font-bold text-slate-200">${endName} 行</td>
+                        <td class="p-3 font-mono text-indigo-400">${t.consistNum || '-'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
                     </tr>
                 `;
@@ -652,7 +725,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                         ${group.items.map(item => {
                             const code = item.split(' ')[0];
-                            const assigned = (appData.trains || []).filter(t => (t.consistNum && t.consistNum.includes(code)) || (t.cars && t.cars.includes(code)));
+                            const assigned = (appData.trains || []).filter(t => (t.consistNum && t.consistNum.includes(code)));
                             const opText = assigned.length > 0 ? assigned.map(a => `${a.opNum}(${a.trainNum})`).join(', ') : '予備・非稼働';
                             return `
                                 <div class="bg-slate-900 p-2.5 rounded border border-slate-700 flex justify-between items-center">
@@ -680,19 +753,19 @@
                 <table class="w-full border-collapse text-xs text-center">
                     <thead>
                         <tr class="bg-slate-900 text-indigo-200 border-b border-slate-700">
-                            <th class="p-3 border-r border-slate-700 text-left sticky left-0 bg-slate-900 z-10">駅名</th>
+                            <th class="py-2 px-3 border-r border-slate-700 text-left sticky left-0 bg-slate-900 z-10 w-36 whitespace-nowrap">駅名</th>
             `;
             trains.forEach(t => {
-                html += `<th class="p-3 border-r border-slate-700 min-w-[90px]"><div class="font-bold text-indigo-300 text-sm">${t.trainNum}</div><div class="text-[10px] text-slate-400 bg-slate-800 px-1 rounded mt-1">${t.type}</div></th>`;
+                html += `<th class="py-2 px-2 border-r border-slate-700 min-w-[70px]"><div class="font-bold text-indigo-300 text-xs">${t.trainNum}</div><div class="text-[9px] text-slate-400 bg-slate-800 px-0.5 rounded mt-0.5">${t.type}</div></th>`;
             });
             html += `</tr></thead><tbody class="divide-y divide-slate-800 text-slate-300">`;
 
             allStationsMaster.forEach(st => {
-                html += `<tr class="hover:bg-slate-750"><td class="p-3 border-r border-slate-700 text-left font-bold sticky left-0 bg-slate-800 z-10">${st.id}. ${st.name}</td>`;
+                html += `<tr class="hover:bg-slate-750"><td class="py-1.5 px-3 border-r border-slate-700 text-left font-medium sticky left-0 bg-slate-800 z-10 whitespace-nowrap text-xs w-36 overflow-hidden text-ellipsis">${st.id}. ${st.name}</td>`;
                 trains.forEach(t => {
                     const isMatch = (t.startSt === st.id || t.endSt === st.id || parseInt(st.id || '1')%3 === 0);
                     const timeCell = isMatch ? `08:${String(parseInt(st.id || '1')*2).padStart(2,'0')}` : '｜';
-                    html += `<td class="p-3 border-r border-slate-800 font-mono">${timeCell}</td>`;
+                    html += `<td class="py-1.5 px-2 border-r border-slate-800 font-mono text-slate-300 text-[11px]">${timeCell}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -822,7 +895,8 @@
         window.onload = function() {
             initFirebase();
             updateAddStationDropdowns();
-            updateConsistNumbers();
+            updateConsistNumbers(1);
+            updateConsistNumbers(2);
             initTimetableDropdowns();
             setInterval(updateLiveDateTime, 1000);
             updateLiveDateTime();
