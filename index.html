@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <!-- 5. 列車追加 (チェック式作業設定・停車駅リアルタイム連動) -->
+        <!-- 5. 列車追加 (チェック式作業設定・前後列車個別設定対応) -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
@@ -252,7 +252,7 @@
                     <!-- 種別変更設定 -->
                     <div class="space-y-2 bg-slate-900 p-3 rounded border border-slate-700">
                         <label class="flex items-center space-x-2 text-xs text-indigo-200 cursor-pointer font-bold">
-                            <input type="checkbox" id="chk-typechange" onchange="toggleActionCheckboxes()" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
+                            <input type="checkbox" id="chk-typechange" onchange="toggleActionCheckboxes('type')" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
                             <span>途中駅から種別を変更する</span>
                         </label>
                         <div id="box-typechange" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 hidden">
@@ -276,24 +276,24 @@
                     <!-- 分割・連結設定 -->
                     <div class="space-y-2 bg-slate-900 p-3 rounded border border-slate-700">
                         <label class="flex items-center space-x-2 text-xs text-indigo-200 cursor-pointer font-bold">
-                            <input type="checkbox" id="chk-coupling" onchange="toggleActionCheckboxes()" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
+                            <input type="checkbox" id="chk-coupling" onchange="toggleActionCheckboxes('coupling')" class="rounded bg-slate-800 border-slate-600 text-indigo-600 focus:ring-0">
                             <span>途中駅で編成の切り離し（分割）または連結を行う</span>
                         </label>
                         <div id="box-coupling" class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 hidden">
                             <div>
-                                <label class="block text-[11px] text-slate-400 mb-1">作業種別</label>
-                                <select id="cp-action" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <label class="block text-[11px] text-slate-400 mb-1">作業種別選択</label>
+                                <select id="cp-action" onchange="updateStationSchedulePreview()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
                                     <option value="uncouple">後部編成を切り離し（分割）</option>
                                     <option value="couple">後部編成を連結</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[11px] text-slate-400 mb-1">対象駅</label>
-                                <select id="cp-station" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
+                                <label class="block text-[11px] text-slate-400 mb-1">作業対象駅</label>
+                                <select id="cp-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
                             </div>
                             <div>
-                                <label class="block text-[11px] text-slate-400 mb-1">対象編成 / 列車番号</label>
-                                <input type="text" id="cp-detail" value="S4-01 または 101M-2" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                                <label class="block text-[11px] text-slate-400 mb-1">対象編成 / 番号</label>
+                                <input type="text" id="cp-detail" value="S4-01" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
                             </div>
                         </div>
                     </div>
@@ -310,9 +310,15 @@
                     </div>
                 </div>
 
-                <!-- 停車駅プレビュー -->
+                <!-- 停車駅プレビュー（前後切り替え対応） -->
                 <div class="space-y-2">
-                    <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間（種別変更・停車駅が自動反映されます）</span>
+                    <div class="flex justify-between items-center">
+                        <span id="preview-title-label" class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間</span>
+                        <div id="preview-tabs" class="flex gap-1 hidden">
+                            <button onclick="switchPreviewSubTab('front')" id="btn-prev-front" class="px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white transition">前方列車 (本務)</button>
+                            <button onclick="switchPreviewSubTab('rear')" id="btn-prev-rear" class="px-2.5 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 transition">後方列車 (切り離し後)</button>
+                        </div>
+                    </div>
                     <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-64 overflow-y-auto text-xs space-y-2">
                         <p class="text-slate-400">始点・終点を選択すると停車駅と時間設定欄が展開されます。</p>
                     </div>
@@ -429,6 +435,7 @@
         ];
 
         let currentActiveLine = 'main';
+        let previewActiveSubTab = 'front'; // 'front' or 'rear'
 
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
@@ -554,21 +561,33 @@
             }
         }
 
-        function toggleActionCheckboxes() {
-            const chkType = document.getElementById('chk-typechange').checked;
-            const boxType = document.getElementById('box-typechange');
-            if(chkType) {
-                boxType.classList.remove('hidden');
-            } else {
-                boxType.classList.add('hidden');
+        function toggleActionCheckboxes(changed) {
+            const chkType = document.getElementById('chk-typechange');
+            const chkCp = document.getElementById('chk-coupling');
+
+            if(changed === 'type' && chkType.checked) {
+                chkCp.checked = false;
+                document.getElementById('box-coupling').classList.add('hidden');
+            } else if(changed === 'coupling' && chkCp.checked) {
+                chkType.checked = false;
+                document.getElementById('box-typechange').classList.add('hidden');
             }
 
-            const chkCp = document.getElementById('chk-coupling').checked;
-            const boxCp = document.getElementById('box-coupling');
-            if(chkCp) {
-                boxCp.classList.remove('hidden');
+            document.getElementById('box-typechange').classList.toggle('hidden', !chkType.checked);
+            document.getElementById('box-coupling').classList.toggle('hidden', !chkCp.checked);
+            updateStationSchedulePreview();
+        }
+
+        function switchPreviewSubTab(subTab) {
+            previewActiveSubTab = subTab;
+            const btnFront = document.getElementById('btn-prev-front');
+            const btnRear = document.getElementById('btn-prev-rear');
+            if(subTab === 'front') {
+                btnFront.className = "px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white transition";
+                btnRear.className = "px-2.5 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 transition";
             } else {
-                boxCp.classList.add('hidden');
+                btnFront.className = "px-2.5 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 transition";
+                btnRear.className = "px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white transition";
             }
             updateStationSchedulePreview();
         }
@@ -583,17 +602,44 @@
             const tcStation = document.getElementById('tc-station').value;
             const tcNewType = document.getElementById('tc-newtype').value;
 
-            const sIdx = allStationsMaster.findIndex(s => s.id === startId);
-            const eIdx = allStationsMaster.findIndex(s => s.id === endId);
+            const chkCp = document.getElementById('chk-coupling').checked;
+            const cpAction = document.getElementById('cp-action').value;
+            const cpStation = document.getElementById('cp-station').value;
+
+            const previewTabs = document.getElementById('preview-tabs');
+            const previewTitle = document.getElementById('preview-title-label');
             const preview = document.getElementById('station-schedule-preview');
             if(!preview) return;
+
+            let sIdx = allStationsMaster.findIndex(s => s.id === startId);
+            let eIdx = allStationsMaster.findIndex(s => s.id === endId);
+            const cpIdx = allStationsMaster.findIndex(s => s.id === cpStation);
+
+            if(chkCp && cpAction === 'uncouple') {
+                previewTabs.classList.remove('hidden');
+                if(previewActiveSubTab === 'rear') {
+                    // 後方列車の場合：始点＝分割駅、終点＝適宜または元の終点
+                    if(cpIdx !== -1 && cpIdx < eIdx) {
+                        sIdx = cpIdx;
+                        previewTitle.innerText = "【後方列車 (切り離し後)】 発着スケジュール設定";
+                    } else {
+                        preview.innerHTML = `<p class="text-amber-400">分割駅は始点より後、終点より前に設定してください。</p>`;
+                        return;
+                    }
+                } else {
+                    // 前方列車の場合：終点＝分割駅で終了させることも可能、またはそのまま
+                    previewTitle.innerText = "【前方列車 (本務)】 発着スケジュール設定";
+                }
+            } else {
+                previewTabs.classList.add('hidden');
+                previewTitle.innerText = "停車駅スケジュール・発着時間";
+            }
             
             if(sIdx === -1 || eIdx === -1 || sIdx > eIdx) {
                 preview.innerHTML = `<p class="text-red-400">始点と終点の順序を確認してください。</p>`;
                 return;
             }
 
-            // 初期種別の停車駅リストを取得
             let currentType = trainType;
             let stopsLists = officialStopsMaster[currentType] || officialStopsMaster["普通"];
             let currentStopIds = stopsLists[patternIdx % stopsLists.length] || stopsLists[0];
@@ -609,13 +655,10 @@
                 </thead>
                 <tbody class="divide-y divide-slate-800">`;
             
-            let passedActionStation = false;
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = allStationsMaster[i];
 
-                // 変更駅に到達したら種別を切り替え、新しい種別の停車パターンに再適用する
                 if(chkType && st.id === tcStation) {
-                    passedActionStation = true;
                     currentType = tcNewType;
                     stopsLists = officialStopsMaster[currentType] || officialStopsMaster["普通"];
                     currentStopIds = stopsLists[patternIdx % stopsLists.length] || stopsLists[0];
@@ -682,7 +725,7 @@
                 actionStation = tcStation;
                 actionDetail = tcNewType;
             } else if(chkCp) {
-                opAction = cpAction; // uncouple or couple
+                opAction = cpAction;
                 actionStation = cpStation;
                 actionDetail = cpDetail;
             }
@@ -871,7 +914,6 @@
             const container = document.getElementById('route-map-stations');
             const titleBanner = document.getElementById('line-title-banner');
             if(!container) return;
-            // 簡易マップ表示用に本線データを割り当て
             const stations = allStationsMaster.slice(8, 30);
             titleBanner.innerText = `紫雲本線 運行モニター（全${stations.length}駅）`;
 
