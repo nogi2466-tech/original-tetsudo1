@@ -220,11 +220,11 @@
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
                     <h3 class="text-indigo-400 font-bold border-b border-slate-700 pb-2">路線データ</h3>
                     <ul class="text-sm text-slate-300 space-y-2">
-                        <li><span class="text-slate-400 inline-block w-28">紫雲本線</span> 駅ID: 1～30</li>
-                        <li><span class="text-slate-400 inline-block w-28">星句高原線</span> 駅ID: 31～40</li>
-                        <li><span class="text-slate-400 inline-block w-28">句守支線</span> 駅ID: 41～55</li>
-                        <li><span class="text-slate-400 inline-block w-28">紫霞観光線</span> 駅ID: 56～60</li>
-                        <li><span class="text-slate-400 inline-block w-28">直通路線</span> 駅ID: 09～1</li>
+                        <li><span class="text-slate-400 inline-block w-28">紫雲本線</span> 駅ID: 1～30[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">星句高原線</span> 駅ID: 31～40[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">句守支線</span> 駅ID: 41～55[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">紫霞観光線</span> 駅ID: 56～60[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">直通路線</span> 駅ID: 09～1[cite: 1]</li>
                     </ul>
                 </div>
             </div>
@@ -261,7 +261,7 @@
             </div>
         </div>
 
-        <!-- 3. 走行位置（路線切替・表示切替対応） -->
+        <!-- 3. 走行位置 -->
         <div id="tab-operation" class="tab-content space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-xl font-bold text-indigo-200">列車走行位置（リアルタイム連動）</h2>
@@ -307,7 +307,7 @@
             </div>
         </div>
 
-        <!-- 4. 列車情報（列車番号順 / 運用番号順 切替対応） -->
+        <!-- 4. 列車情報 -->
         <div id="tab-traininfo" class="tab-content space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <h2 class="text-xl font-bold text-indigo-200">列車情報一覧（リアルタイム連動）</h2>
@@ -390,6 +390,18 @@
                             <option value="event">イベント日</option>
                             <option value="newyear">年末年始</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- 発着時間入力フィールド -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-indigo-300 mb-1 font-bold">始発駅 発車時刻</label>
+                        <input type="time" id="add-dep-time" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="08:00">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-indigo-300 mb-1 font-bold">終着駅 到着時刻</label>
+                        <input type="time" id="add-arr-time" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="09:30">
                     </div>
                 </div>
 
@@ -563,9 +575,9 @@
 
         let appData = {
             trains: [
-                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01 (10両)", status: "走行中", currentIdx: 10 },
-                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01 (10両)", status: "走行中", currentIdx: 20 },
-                { id: 3, trainNum: "205M", opNum: "73K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", consistNum: "S3-05 (8両)", status: "停車中", currentIdx: 5 }
+                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", depTime: "07:00", arrTime: "23:59", consistNum: "S100-01 (10両)", status: "走行中", currentIdx: 10 },
+                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", depTime: "07:00", arrTime: "23:59", consistNum: "S2-01 (10両)", status: "走行中", currentIdx: 20 },
+                { id: 3, trainNum: "205M", opNum: "73K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", depTime: "07:00", arrTime: "23:59", consistNum: "S3-05 (8両)", status: "停車中", currentIdx: 5 }
             ],
             eventDates: ["2026-10-15"]
         };
@@ -651,6 +663,8 @@
             const runDay = document.getElementById('add-run-day').value;
             const startSt = document.getElementById('add-start-station').value;
             const endSt = document.getElementById('add-end-station').value;
+            const depTime = document.getElementById('add-dep-time').value || "08:00";
+            const arrTime = document.getElementById('add-arr-time').value || "09:30";
             
             const consistMode = document.getElementById('consist-mode').value;
             const c1Full = document.getElementById('consist-number-1').value;
@@ -672,6 +686,8 @@
                 runDay,
                 startSt,
                 endSt,
+                depTime,
+                arrTime,
                 consistNum: consistStr,
                 status: "走行中",
                 currentIdx: startIdx !== -1 ? startIdx : 0
@@ -683,7 +699,7 @@
             switchTab('traininfo');
         }
 
-        /* --- 列車情報テーブル描画（列車番号順 / 運用番号順 切替対応） --- */
+        /* --- 列車情報テーブル描画 --- */
         function renderTrainInfoTable() {
             const container = document.getElementById('train-info-container');
             const viewMode = document.getElementById('train-view-mode')?.value || 'trainnum';
@@ -696,7 +712,6 @@
             }
 
             if(viewMode === 'trainnum') {
-                // 従来の列車番号順一覧
                 let html = `
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-900 text-indigo-200 border-b border-slate-700">
@@ -705,6 +720,7 @@
                                 <th class="p-3">運用番号</th>
                                 <th class="p-3">種別・区間ルール</th>
                                 <th class="p-3">行き先</th>
+                                <th class="p-3">運行時間</th>
                                 <th class="p-3">両数・編成番号</th>
                                 <th class="p-3">状態</th>
                             </tr>
@@ -722,6 +738,7 @@
                             <td class="p-3 font-mono">${t.opNum}</td>
                             <td class="p-3">${t.type}</td>
                             <td class="p-3 font-bold text-slate-200">${endName} 行</td>
+                            <td class="p-3 font-mono text-indigo-300">${t.depTime || '08:00'}発 〜 ${t.arrTime || '09:30'}着</td>
                             <td class="p-3 font-mono text-indigo-400">${t.consistNum || '-'}</td>
                             <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
                         </tr>
@@ -730,8 +747,6 @@
                 html += `</tbody></table>`;
                 container.innerHTML = html;
             } else {
-                // 運用番号順：左に運用番号、右に時間順でその運用番号で走る列車番号・種別・行き先を表示
-                // 運用ごとにグループ化
                 let opMap = {};
                 trains.forEach(t => {
                     const op = t.opNum || '未割当';
@@ -752,8 +767,7 @@
 
                 for(let op in opMap) {
                     let opTrains = opMap[op];
-                    // 時間順（列車番号順や配列順）にソート
-                    opTrains.sort((a,b) => a.trainNum.localeCompare(b.trainNum));
+                    opTrains.sort((a,b) => (a.depTime || "").localeCompare(b.depTime || ""));
 
                     html += `
                         <tr class="hover:bg-slate-750 align-top">
@@ -776,6 +790,7 @@
                                     <span class="text-xs font-mono text-slate-400">#${idx + 1}</span>
                                     <span class="font-bold text-indigo-300 font-mono text-sm">${t.trainNum}</span>
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold ${typeClass}">${t.type}</span>
+                                    <span class="font-mono text-indigo-300 text-[11px]">${t.depTime || '08:00'}発 〜 ${t.arrTime || '09:30'}着</span>
                                 </div>
                                 <div class="text-slate-200 font-medium">
                                     ${startName}発 → <span class="text-indigo-200 font-bold">${endName}行</span>
@@ -847,7 +862,7 @@
             allStationsMaster.forEach(st => {
                 html += `<tr class="hover:bg-slate-750"><td class="py-1.5 px-3 border-r border-slate-700 text-left font-medium sticky left-0 bg-slate-800 z-10 whitespace-nowrap text-xs w-36 overflow-hidden text-ellipsis">${st.id}. ${st.name}</td>`;
                 trains.forEach(t => {
-                    html += `<td class="py-1.5 px-2 border-r border-slate-800 font-mono text-slate-300 text-[11px]">08:10</td>`;
+                    html += `<td class="py-1.5 px-2 border-r border-slate-800 font-mono text-slate-300 text-[11px]">${t.depTime || '08:10'}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -940,7 +955,14 @@
             checkEventDayStatus();
         }
 
-        /* --- 走行位置スクリプト --- */
+        // 時刻文字列（"08:30"など）を分単位に変換するヘルパー
+        function timeToMinutes(timeStr) {
+            if (!timeStr || !timeStr.includes(':')) return 0;
+            const parts = timeStr.split(':');
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+
+        /* --- 走行位置スクリプト（時間判定対応版） --- */
         function renderOperationTrack() {
             const containerParent = document.getElementById('track-container-parent');
             if(!containerParent) return;
@@ -992,7 +1014,19 @@
             });
 
             const trains = appData.trains || [];
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
             trains.forEach((t, i) => {
+                // ★ 自動運行シミュレーション中ではない場合のみ、設定された発着時間外は非表示にする
+                if (!isAutoMoving && t.depTime && t.arrTime) {
+                    const depMin = timeToMinutes(t.depTime);
+                    const arrMin = timeToMinutes(t.arrTime);
+                    if (currentMinutes < depMin || currentMinutes > arrMin) {
+                        return; // 運行時間外のためスキップ（表示しない）
+                    }
+                }
+
                 const currentStObj = allStationsMaster[t.currentIdx || 0] || allStationsMaster[0];
                 
                 if(selectedLine !== 'all') {
@@ -1108,6 +1142,7 @@
                     <div class="flex justify-between"><span class="text-slate-400">編成番号:</span> <span class="font-mono text-indigo-400">${train.consistNum || 'S100-01'}</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">種別:</span> <span class="font-bold text-emerald-300">${train.type}</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">区間:</span> <span class="text-slate-200">${startStName}発 〜 ${destName}行</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">運行時間:</span> <span class="font-mono text-indigo-300">${train.depTime || '08:00'}発 〜 ${train.arrTime || '09:30'}着</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">両数:</span> <span class="font-mono text-indigo-200">${train.consistNum ? train.consistNum.split(' ')[1] || '10両' : '10両'}</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">現在の状態:</span> <span class="font-bold text-amber-300">${train.status} (📍 ${curStName}付近)</span></div>
                 </div>
@@ -1127,6 +1162,7 @@
                 isAutoMoving = false;
                 btn.className = "bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow";
                 btn.innerText = "▶ 自動運行シミュレーション開始";
+                renderOperationTrack();
             } else {
                 isAutoMoving = true;
                 btn.className = "bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow animate-pulse";
@@ -1135,7 +1171,7 @@
                     if(appData.trains) {
                         appData.trains.forEach(t => {
                             if(t.currentIdx === undefined) t.currentIdx = 0;
-                            t.currentIdx = (t.currentIdx + 1) % allStationsMaster.length;
+                            t.currentIdx = (t.currentIdx + 1) * 1 % allStationsMaster.length;
                         });
                         pushData();
                         updateUI();
