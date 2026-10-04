@@ -235,6 +235,30 @@
                     </div>
                 </div>
 
+                <!-- 併結・分割・種別変更などの詳細運行設定 -->
+                <div class="border border-indigo-900/60 bg-indigo-950/20 p-4 rounded-lg space-y-3">
+                    <span class="text-xs text-indigo-300 font-bold block">🔗 連結・分割・種別変更 詳細オプション</span>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">作業種別</label>
+                            <select id="add-op-action" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                                <option value="none">なし（通常運行）</option>
+                                <option value="couple">併結（連結）作業</option>
+                                <option value="uncouple">分割（切り離し）作業</option>
+                                <option value="typechange">途中駅での種別変更</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">対象駅</label>
+                            <select id="add-action-station" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">変更後種別 / 連結編成</label>
+                            <input type="text" id="add-action-detail" placeholder="例: 快速 / S1-06" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">始点駅</label>
@@ -249,7 +273,7 @@
                 <!-- 停車駅・時間設定プレビューエリア -->
                 <div class="space-y-2">
                     <span class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間設定</span>
-                    <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-56 overflow-y-auto text-xs space-y-2">
+                    <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-64 overflow-y-auto text-xs space-y-2">
                         <p class="text-slate-400">始点・終点を選択すると停車駅と時間設定欄が展開されます。</p>
                     </div>
                 </div>
@@ -388,7 +412,6 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                // 固定のデータベースキーに変更し、データが消えないように修正
                 dbRef = firebase.database().ref('shinomori_railway_master');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
@@ -448,6 +471,7 @@
             
             document.getElementById('add-start-station').innerHTML = options;
             document.getElementById('add-end-station').innerHTML = options;
+            document.getElementById('add-action-station').innerHTML = options;
             if(stations.length > 1) document.getElementById('add-end-station').selectedIndex = stations.length - 1;
             updateStationSchedulePreview();
         }
@@ -477,15 +501,42 @@
                 return;
             }
 
-            let html = `<table class="w-full text-left"><thead><tr class="text-indigo-300 border-b border-slate-800"><th class="p-1">駅名</th><th class="p-1">到着時刻</th><th class="p-1">発車時刻</th></tr></thead><tbody>`;
+            // 作業用駅のセレクトボックスも更新
+            const actionStationSel = document.getElementById('add-action-station');
+            let actionOptions = '';
+            for(let i = sIdx; i <= eIdx; i++) {
+                actionOptions += `<option value="${stations[i].id}">${stations[i].id}. ${stations[i].name}</option>`;
+            }
+            actionStationSel.innerHTML = actionOptions;
+
+            let html = `<table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-indigo-300 border-b border-slate-800 text-[11px]">
+                        <th class="p-2">停車駅名</th>
+                        <th class="p-2">到着時刻</th>
+                        <th class="p-2">発車時刻</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">`;
+            
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = stations[i];
-                const timeStr = `08:${String(10 + (i - sIdx)*3).padStart(2,'0')}`;
+                let baseHour = 8;
+                let baseMin = 10 + (i - sIdx) * 3;
+                if(baseMin >= 60) {
+                    baseHour += Math.floor(baseMin / 60);
+                    baseMin = baseMin % 60;
+                }
+                const timeStr = `${String(baseHour).padStart(2,'0')}:${String(baseMin).padStart(2,'0')}`;
+                
+                const isStart = (i === sIdx);
+                const isEnd = (i === eIdx);
+
                 html += `
-                    <tr class="border-b border-slate-800">
-                        <td class="p-1 font-bold">${st.id}. ${st.name}</td>
-                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="arr-time bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
-                        <td class="p-1 font-mono"><input type="text" value="${timeStr}" class="dep-time bg-slate-800 border border-slate-700 rounded px-1 w-16 text-xs text-white"></td>
+                    <tr>
+                        <td class="p-2 font-bold text-slate-200">${st.id}. ${st.name}</td>
+                        <td class="p-2"><input type="text" value="${isStart ? '-' : timeStr}" class="arr-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
+                        <td class="p-2"><input type="text" value="${isEnd ? '-' : timeStr}" class="dep-time bg-slate-950 border border-slate-700 rounded px-2 py-1 w-20 text-xs font-mono text-center text-white focus:border-indigo-500 outline-none"></td>
                     </tr>
                 `;
             }
@@ -505,6 +556,11 @@
             const series = document.getElementById('consist-series').value;
             const consistNumFull = document.getElementById('consist-number-sel').value;
             
+            // 併結・分割・種別変更オプション
+            const opAction = document.getElementById('add-op-action').value;
+            const actionStation = document.getElementById('add-action-station').value;
+            const actionDetail = document.getElementById('add-action-detail').value;
+
             const consistNumOnly = consistNumFull ? consistNumFull.split(' ')[0] : series;
 
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
@@ -522,6 +578,9 @@
                 endSt,
                 cars: carsCount,
                 consistNum: consistNumOnly,
+                opAction,
+                actionStation,
+                actionDetail,
                 status: randomStatus,
                 stationId: startSt
             });
@@ -532,7 +591,6 @@
             switchTab('traininfo');
         }
 
-        // 列車情報一覧のレンダリング（列車番号、運用番号、種別、行き先、両数、編成番号、状態）
         function renderTrainInfoTable() {
             const tbody = document.getElementById('train-info-tbody');
             if(!tbody) return;
@@ -561,12 +619,21 @@
                     consistVal = parts[1] ? parts[1].replace(')', '').trim() : '-';
                 }
 
+                // 併結・分割のバッジ表示用情報
+                let actionBadge = '';
+                if(t.opAction && t.opAction !== 'none') {
+                    const stName = allStationsMaster.find(s => s.id === t.actionStation)?.name || '';
+                    if(t.opAction === 'couple') actionBadge = `<div class="text-[10px] text-amber-300">🔗 ${stName}で併結:${t.actionDetail || ''}</div>`;
+                    if(t.opAction === 'uncouple') actionBadge = `<div class="text-[10px] text-sky-300">✂️ ${stName}で分割</div>`;
+                    if(t.opAction === 'typechange') actionBadge = `<div class="text-[10px] text-purple-300">🔄 ${stName}で${t.actionDetail || ''}に変更</div>`;
+                }
+
                 return `
                     <tr class="hover:bg-slate-750 transition">
                         <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
                         <td class="p-3 font-mono">${t.opNum}</td>
                         <td class="p-3">${t.type}</td>
-                        <td class="p-3 font-bold text-slate-200">${endName} 行</td>
+                        <td class="p-3 font-bold text-slate-200">${endName} 行 ${actionBadge}</td>
                         <td class="p-3">${carsVal}</td>
                         <td class="p-3 font-mono text-indigo-400">${consistVal}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
