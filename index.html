@@ -43,7 +43,7 @@
                 opacity: 1;
                 pointer-events: auto;
             }
-            /* スマホ用メニュー内の各タブボタンをGemini風のリスト項目に最適化 */
+            /* スマホ用メニュー内の各タブボタンをGemini風のリスト項目に最適化（文字が縦にならないよう調整） */
             #nav-menu .tab-btn {
                 width: 100% !important;
                 text-align: left !important;
@@ -51,10 +51,11 @@
                 border-radius: 9999px !important; /* 角丸ピル型 */
                 font-size: 14px !important;
                 font-weight: 500 !important;
-                white-space: nowrap !important;
+                white-space: nowrap !important; /* 文字の勝手な折り返し・縦並びを防ぐ */
                 display: flex !important;
                 align-items: center !important;
                 gap: 12px;
+                box-sizing: border-box;
             }
         }
 
@@ -1226,12 +1227,11 @@
             const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
             trains.forEach((t) => {
-                // 1. 運行時間外（出発前、または到着後）の場合は非表示にする
                 if (!t.depTime || !t.arrTime) return;
                 const depMin = timeToMinutes(t.depTime);
                 const arrMin = timeToMinutes(t.arrTime);
                 if (currentMinutes < depMin || currentMinutes > arrMin) {
-                    return; // 時間外なのでスキップ
+                    return;
                 }
 
                 const totalDuration = Math.max(1, arrMin - depMin);
@@ -1262,10 +1262,7 @@
                 const decimalPart = t._realtimeStationIdx - floorIdx;
                 const topPos = 40 + ((t.filteredIdx + decimalPart) * spacing);
 
-                // 2. 上り・下りの判定：始発駅のインデックス vs 終着駅のインデックスで正確に判定
-                //   起点から終点へ向かう方向が数値増（下り）か数値減（上り）かを判定
                 const isDownTrain = eIdx >= sIdx; 
-                // 下りなら右側 (down-train)、上りなら左側 (up-train)
                 const trainClass = isDownTrain ? 'down-train' : 'up-train';
 
                 const destName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
