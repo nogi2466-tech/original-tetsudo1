@@ -164,28 +164,49 @@
             </div>
         </div>
 
-        <!-- 5. 列車追加 (チェック式作業設定・前後列車個別設定対応) -->
+        <!-- 5. 列車追加 (完全拡張版) -->
         <div id="tab-addtrain" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">新規列車運用追加・詳細設定</h2>
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-3xl space-y-5">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">列車番号</label>
-                        <input type="text" id="add-train-num" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="101M">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">運用番号</label>
-                        <input type="text" id="add-op-num" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="A01">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">運行日設定</label>
-                        <select id="add-run-day" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option value="weekday">平日</option>
-                            <option value="holiday">土休日</option>
-                            <option value="event">イベント日</option>
-                            <option value="newyear">年末年始</option>
+                <!-- 列車番号・運用番号（共通 or 分割設定） -->
+                <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-indigo-300 font-bold">列車番号・運用番号の設定モード</span>
+                        <select id="num-mode" onchange="toggleNumMode()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                            <option value="common">共通設定（前後共通）</option>
+                            <option value="split">個別に分ける（前部・後部別）</option>
                         </select>
+                    </div>
+
+                    <!-- 共通設定 -->
+                    <div id="box-num-common" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">列車番号</label>
+                            <input type="text" id="add-train-num" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="101M">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">運用番号</label>
+                            <input type="text" id="add-op-num" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="A01">
+                        </div>
+                    </div>
+
+                    <!-- 個別設定（分割・連結時） -->
+                    <div id="box-num-split" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 hidden">
+                        <div class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700">
+                            <span class="text-[11px] text-indigo-300 font-bold block">【前方列車（本務列車）】番号</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="front-train-num" placeholder="列車番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="101M">
+                                <input type="text" id="front-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="A01">
+                            </div>
+                        </div>
+                        <div class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700">
+                            <span class="text-[11px] text-sky-300 font-bold block">【後方列車（増結・分割後）】番号</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="rear-train-num" placeholder="列車番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="103M">
+                                <input type="text" id="rear-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="A02">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -203,23 +224,23 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">停車駅パターン（路線系統）選択</label>
-                        <select id="add-pattern-index" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
-                            <option value="0">パターン1 (本線直通・標準)</option>
-                            <option value="1">パターン2 (高原線直通)</option>
-                            <option value="2">パターン3 (支線直通)</option>
-                            <option value="3">パターン4 (観光線直通)</option>
+                        <label class="block text-xs text-slate-400 mb-1">運行日設定</label>
+                        <select id="add-run-day" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white">
+                            <option value="weekday">平日</option>
+                            <option value="holiday">土休日</option>
+                            <option value="event">イベント日</option>
+                            <option value="newyear">年末年始</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- 正式形式・編成選択（2編成併結対応） -->
+                <!-- 編成構成（2編成併結対応） -->
                 <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs text-indigo-300 font-bold">編成構成（両数ルール準拠）</span>
                         <select id="consist-mode" onchange="toggleConsistMode()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
                             <option value="single">単行編成</option>
-                            <option value="double">併結編成（前部 ＋ 後部）</option>
+                            <option value="double" selected>併結編成（前部 ＋ 後部）</option>
                         </select>
                     </div>
 
@@ -233,7 +254,7 @@
                                 <select id="consist-number-1" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"></select>
                             </div>
                         </div>
-                        <div id="consist-2-container" class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700 hidden">
+                        <div id="consist-2-container" class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700">
                             <span class="text-[11px] text-sky-300 font-bold block">【後部編成】</span>
                             <div class="grid grid-cols-2 gap-2">
                                 <select id="consist-series-2" onchange="updateConsistNumbers(2)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
@@ -299,14 +320,30 @@
                     </div>
                 </div>
 
+                <!-- 始点・終点設定（切り離し・連結に応じた個別対応） -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">始点駅</label>
-                        <select id="add-start-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                    <div class="space-y-2">
+                        <label class="block text-xs text-indigo-300 font-bold">始点駅設定</label>
+                        <div class="space-y-1">
+                            <span id="label-start-1" class="text-[11px] text-slate-400 block">始点駅</span>
+                            <select id="add-start-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        </div>
+                        <div id="box-start-rear" class="space-y-1 hidden pt-1">
+                            <span class="text-[11px] text-sky-300 block">【後方列車】連結前の始点駅</span>
+                            <select id="add-start-station-rear" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">終点駅（行き先）</label>
-                        <select id="add-end-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs text-indigo-300 font-bold">終点駅（行き先）設定</label>
+                        <div class="space-y-1">
+                            <span id="label-end-1" class="text-[11px] text-slate-400 block">終点駅（行き先）</span>
+                            <select id="add-end-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        </div>
+                        <div id="box-end-rear" class="space-y-1 hidden pt-1">
+                            <span class="text-[11px] text-sky-300 block">【後方列車（切り離し後）】終点駅（行き先）</span>
+                            <select id="add-end-station-rear" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        </div>
                     </div>
                 </div>
 
@@ -316,7 +353,7 @@
                         <span id="preview-title-label" class="text-xs text-indigo-300 font-bold block">停車駅スケジュール・発着時間</span>
                         <div id="preview-tabs" class="flex gap-1 hidden">
                             <button onclick="switchPreviewSubTab('front')" id="btn-prev-front" class="px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white transition">前方列車 (本務)</button>
-                            <button onclick="switchPreviewSubTab('rear')" id="btn-prev-rear" class="px-2.5 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 transition">後方列車 (切り離し後)</button>
+                            <button onclick="switchPreviewSubTab('rear')" id="btn-prev-rear" class="px-2.5 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 transition">後方列車</button>
                         </div>
                     </div>
                     <div id="station-schedule-preview" class="bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-64 overflow-y-auto text-xs space-y-2">
@@ -535,11 +572,27 @@
         function updateAddStationDropdowns() {
             const options = allStationsMaster.map(st => `<option value="${st.id}">${st.id}. ${st.name}</option>`).join('');
             document.getElementById('add-start-station').innerHTML = options;
+            document.getElementById('add-start-station-rear').innerHTML = options;
             document.getElementById('add-end-station').innerHTML = options;
+            document.getElementById('add-end-station-rear').innerHTML = options;
             document.getElementById('tc-station').innerHTML = options;
             document.getElementById('cp-station').innerHTML = options;
             document.getElementById('add-end-station').value = "30";
+            document.getElementById('add-end-station-rear').value = "20";
             updateStationSchedulePreview();
+        }
+
+        function toggleNumMode() {
+            const mode = document.getElementById('num-mode').value;
+            const commonBox = document.getElementById('box-num-common');
+            const splitBox = document.getElementById('box-num-split');
+            if(mode === 'split') {
+                commonBox.classList.add('hidden');
+                splitBox.classList.remove('hidden');
+            } else {
+                commonBox.classList.remove('hidden');
+                splitBox.classList.add('hidden');
+            }
         }
 
         function toggleConsistMode() {
@@ -575,6 +628,33 @@
 
             document.getElementById('box-typechange').classList.toggle('hidden', !chkType.checked);
             document.getElementById('box-coupling').classList.toggle('hidden', !chkCp.checked);
+
+            // 切り離し・連結に応じた始点・終点・タブの表示切り替え
+            const cpAction = document.getElementById('cp-action').value;
+            const boxStartRear = document.getElementById('box-start-rear');
+            const boxEndRear = document.getElementById('box-end-rear');
+            const labelStart1 = document.getElementById('label-start-1');
+            const labelEnd1 = document.getElementById('label-end-1');
+
+            if(chkCp && chkCp.checked) {
+                if(cpAction === 'couple') {
+                    // 連結の場合：後ろの列車の連結前始点駅を設定可能に
+                    boxStartRear.classList.remove('hidden');
+                    boxEndRear.classList.add('hidden');
+                    labelStart1.innerText = "【前方列車】始点駅";
+                } else if(cpAction === 'uncouple') {
+                    // 切り離しの場合：後ろの列車の切り離し後終点駅を設定可能に
+                    boxStartRear.classList.add('hidden');
+                    boxEndRear.classList.remove('hidden');
+                    labelEnd1.innerText = "【前方列車】終点駅（行き先）";
+                }
+            } else {
+                boxStartRear.classList.add('hidden');
+                boxEndRear.classList.add('hidden');
+                labelStart1.innerText = "始点駅";
+                labelEnd1.innerText = "終点駅（行き先）";
+            }
+
             updateStationSchedulePreview();
         }
 
@@ -594,9 +674,7 @@
 
         function updateStationSchedulePreview() {
             const trainType = document.getElementById('add-train-type').value;
-            const patternIdx = parseInt(document.getElementById('add-pattern-index').value) || 0;
-            const startId = document.getElementById('add-start-station').value;
-            const endId = document.getElementById('add-end-station').value;
+            const patternIdx = parseInt(document.getElementById('add-pattern-index') ? document.getElementById('add-pattern-index').value : 0) || 0;
             
             const chkType = document.getElementById('chk-typechange').checked;
             const tcStation = document.getElementById('tc-station').value;
@@ -611,29 +689,37 @@
             const preview = document.getElementById('station-schedule-preview');
             if(!preview) return;
 
-            let sIdx = allStationsMaster.findIndex(s => s.id === startId);
-            let eIdx = allStationsMaster.findIndex(s => s.id === endId);
-            const cpIdx = allStationsMaster.findIndex(s => s.id === cpStation);
+            let startId = document.getElementById('add-start-station').value;
+            let endId = document.getElementById('add-end-station').value;
 
-            if(chkCp && cpAction === 'uncouple') {
+            if(chkCp) {
                 previewTabs.classList.remove('hidden');
-                if(previewActiveSubTab === 'rear') {
-                    // 後方列車の場合：始点＝分割駅、終点＝適宜または元の終点
-                    if(cpIdx !== -1 && cpIdx < eIdx) {
-                        sIdx = cpIdx;
+                if(cpAction === 'uncouple') {
+                    if(previewActiveSubTab === 'rear') {
+                        // 後方列車（切り離し後）：始点＝分割駅、終点＝後方列車専用終点
+                        startId = cpStation;
+                        endId = document.getElementById('add-end-station-rear').value;
                         previewTitle.innerText = "【後方列車 (切り離し後)】 発着スケジュール設定";
                     } else {
-                        preview.innerHTML = `<p class="text-amber-400">分割駅は始点より後、終点より前に設定してください。</p>`;
-                        return;
+                        previewTitle.innerText = "【前方列車 (本務)】 発着スケジュール設定";
                     }
-                } else {
-                    // 前方列車の場合：終点＝分割駅で終了させることも可能、またはそのまま
-                    previewTitle.innerText = "【前方列車 (本務)】 発着スケジュール設定";
+                } else if(cpAction === 'couple') {
+                    if(previewActiveSubTab === 'rear') {
+                        // 後方列車（連結前）：始点＝後方列車連結前始点、終点＝連結駅(cpStation)
+                        startId = document.getElementById('add-start-station-rear').value;
+                        endId = cpStation;
+                        previewTitle.innerText = "【後方列車 (連結前)】 発着スケジュール設定";
+                    } else {
+                        previewTitle.innerText = "【前方列車 (本務)】 発着スケジュール設定";
+                    }
                 }
             } else {
                 previewTabs.classList.add('hidden');
                 previewTitle.innerText = "停車駅スケジュール・発着時間";
             }
+
+            let sIdx = allStationsMaster.findIndex(s => s.id === startId);
+            let eIdx = allStationsMaster.findIndex(s => s.id === endId);
             
             if(sIdx === -1 || eIdx === -1 || sIdx > eIdx) {
                 preview.innerHTML = `<p class="text-red-400">始点と終点の順序を確認してください。</p>`;
@@ -690,8 +776,15 @@
         }
 
         function addNewTrain() {
-            const trainNum = document.getElementById('add-train-num').value;
-            const opNum = document.getElementById('add-op-num').value;
+            const numMode = document.getElementById('num-mode').value;
+            let trainNum = document.getElementById('add-train-num').value;
+            let opNum = document.getElementById('add-op-num').value;
+
+            if(numMode === 'split') {
+                trainNum = `${document.getElementById('front-train-num').value} / ${document.getElementById('rear-train-num').value}`;
+                opNum = `${document.getElementById('front-op-num').value} / ${document.getElementById('rear-op-num').value}`;
+            }
+
             const type = document.getElementById('add-train-type').value;
             const runDay = document.getElementById('add-run-day').value;
             const startSt = document.getElementById('add-start-station').value;
