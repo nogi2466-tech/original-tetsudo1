@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紫句守鉄道（しのもり鉄道）総合運行管理システム ＆ 運行シミュレーション</title>
+    <title>紫句守鉄道（しのもり鉄道）総合運行管理システム ＆ 走行位置</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDK (Compat) -->
@@ -14,89 +14,97 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* シミュレーション用スタイル */
-        .track-container {
+        /* 走行位置用スタイル（全駅縦方向配置・中央線） */
+        .track-container-vertical {
             position: relative;
-            height: 120px;
+            min-height: 1200px;
             background: #1e293b;
             border-radius: 8px;
-            padding: 20px;
+            padding: 40px 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
             border: 1px solid #334155;
+            display: flex;
+            justify-content: center;
         }
-        .rail {
+        .vertical-rail {
             position: absolute;
-            top: 60px;
-            left: 50px;
-            right: 50px;
-            height: 4px;
+            top: 40px;
+            bottom: 40px;
+            left: 50%;
+            width: 4px;
             background: #64748b;
+            transform: translateX(-50%);
         }
-        .station {
+        .v-station-node {
             position: absolute;
-            top: 45px;
-            width: 10px;
-            height: 34px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            width: 100%;
+            pointer-events: none;
+        }
+        .v-station-dot {
+            position: absolute;
+            left: 50%;
+            width: 12px;
+            height: 12px;
             background: #94a3b8;
+            border-radius: 50%;
             transform: translateX(-50%);
+            z-index: 2;
         }
-        .station-label {
+        .v-station-label {
             position: absolute;
-            top: 85px;
+            left: calc(50% + 20px);
             font-size: 0.8rem;
-            transform: translateX(-50%);
-            white-space: nowrap;
             color: #cbd5e1;
+            white-space: nowrap;
         }
-        .train {
+        /* 列車配置スタイル（左右分離） */
+        .v-train {
             position: absolute;
-            top: 25px;
-            transform: translateX(-50%);
-            transition: left 0.1s linear;
+            transform: translateY(-50%);
             cursor: pointer;
             z-index: 10;
+            transition: top 0.5s linear;
         }
-        .train-icon {
-            width: 20px;
-            height: 20px;
+        .v-train.up-train {
+            right: calc(50% + 30px); /* 中央線の左側 */
+            text-align: right;
+        }
+        .v-train.down-train {
+            left: calc(50% + 30px); /* 中央線の右側 */
+            text-align: left;
+        }
+        .train-icon-v {
+            width: 24px;
+            height: 24px;
             background: #ff5722;
             border-radius: 4px;
             text-align: center;
             color: white;
-            font-size: 10px;
-            line-height: 20px;
+            font-size: 11px;
+            line-height: 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .train-detail {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .triangle-up {
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-bottom: 10px solid #38bdf8;
-            margin-bottom: 2px;
-        }
-        .train-box {
-            width: 60px;
-            height: 36px;
+        .train-card-v {
             background: #0284c7;
             color: white;
-            border-radius: 3px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            border-radius: 4px;
+            padding: 4px 8px;
             font-size: 10px;
-            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 1px solid #38bdf8;
+            min-width: 90px;
         }
-        .train-number {
+        .train-num-top {
             font-size: 9px;
+            font-weight: bold;
             color: #e2e8f0;
-            margin-top: 2px;
+            margin-bottom: 1px;
             white-space: nowrap;
         }
     </style>
@@ -136,7 +144,7 @@
     <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 sticky top-0 z-40 backdrop-blur shadow-md">
         <button onclick="switchTab('about')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white shadow" data-tab="about">会社について</button>
         <button onclick="switchTab('timetable')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="timetable">時刻表</button>
-        <button onclick="switchTab('operation')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="operation">走行位置・シミュレーション</button>
+        <button onclick="switchTab('operation')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="operation">走行位置</button>
         <button onclick="switchTab('traininfo')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="traininfo">列車情報</button>
         <button onclick="switchTab('addtrain')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="addtrain">列車追加</button>
         <button onclick="switchTab('consist')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="consist">編成表</button>
@@ -204,52 +212,34 @@
                 <button onclick="renderTimetable()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm font-medium transition shadow">時刻表を表示</button>
             </div>
             <div id="timetable-container" class="bg-slate-800 rounded-xl border border-slate-700 p-4 overflow-x-auto text-sm">
-                <p class="text-slate-400">条件を選択して「時刻表を表示」を押してください。</p>
+                <p class="text-slate-400">条件を選択して「時刻表を表示」してください。</p>
             </div>
         </div>
 
-        <!-- 3. 走行位置・シミュレーション -->
+        <!-- 3. 走行位置 -->
         <div id="tab-operation" class="tab-content space-y-4">
-            <h2 class="text-xl font-bold text-indigo-200">列車位置・状態シミュレーション</h2>
+            <h2 class="text-xl font-bold text-indigo-200">列車走行位置（全駅表示・上下分離）</h2>
             
             <div class="controls bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
-                <label class="flex items-center space-x-2 text-sm text-slate-200 cursor-pointer">
-                    <input type="checkbox" id="toggleView" onchange="switchView()" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
-                    <span>詳細表示に切り替える</span>
-                </label>
-                <button onclick="startSimulation()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm font-medium transition shadow">シミュレーション開始</button>
-            </div>
-
-            <div class="track-container">
-                <div class="rail"></div>
-                <!-- 駅配置 (A駅, B駅, C駅) -->
-                <div class="station" style="left: 100px;"></div>
-                <div class="station-label" style="left: 100px;">A駅 (始発)</div>
-
-                <div class="station" style="left: 350px;"></div>
-                <div class="station-label" style="left: 350px;">B駅 (30秒停車)</div>
-
-                <div class="station" style="left: 600px;"></div>
-                <div class="station-label" style="left: 600px;">C駅 (終点)</div>
-
-                <!-- 列車要素 -->
-                <div id="train" class="train" style="left: 100px; display: none;">
-                    <!-- アイコンモード -->
-                    <div id="modeIcon" class="train-icon">列</div>
-                    <!-- 詳細モード -->
-                    <div id="modeDetail" class="train-detail" style="display: none;">
-                        <div class="triangle-up"></div>
-                        <div class="train-box">
-                            <span id="trainType">快速</span>
-                            <span id="trainDest">東京</span>
-                        </div>
-                        <div id="trainNum" class="train-number">1001M</div>
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center space-x-2 text-sm text-slate-200 cursor-pointer">
+                        <input type="checkbox" id="toggleView" onchange="renderOperationTrack()" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
+                        <span>詳細表示（四角形）に切り替える</span>
+                    </label>
+                </div>
+                <div class="text-xs text-indigo-300">
+                    📍 中央線を境に <strong>左側：上り列車</strong> ／ <strong>右側：下り列車</strong> を表示しています
                 </div>
             </div>
 
-            <div class="status-panel bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p class="text-sm text-slate-300"><strong>運行情報:</strong> <span id="statusText" class="text-indigo-300 font-bold">待機中</span></p>
+            <div id="track-container-parent" class="track-container-vertical">
+                <div class="vertical-rail"></div>
+                <!-- 動的に全駅と列車が描画されます -->
+            </div>
+
+            <div class="status-panel bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                <p class="text-sm text-slate-300"><strong>運行状況モニタリング:</strong> <span id="statusText" class="text-indigo-300 font-bold">全線正常運行中（登録列車を自動配置）</span></p>
+                <button onclick="renderOperationTrack()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs transition">位置を更新</button>
             </div>
         </div>
 
@@ -610,6 +600,7 @@
             if (tabId === 'traininfo') renderTrainInfoTable();
             if (tabId === 'consist') renderConsistMatrix();
             if (tabId === 'settings') renderEventDatesList();
+            if (tabId === 'operation') renderOperationTrack();
             if (tabId === 'addtrain') {
                 updateAddStationDropdowns();
                 updateStationSchedulePreview();
@@ -653,6 +644,9 @@
             initTimetableDropdowns();
             renderEventDatesList();
             checkEventDayStatus();
+            if(document.getElementById('tab-operation').classList.contains('active')) {
+                renderOperationTrack();
+            }
         }
 
         function updateAddStationDropdowns() {
@@ -904,7 +898,7 @@
                 actionDetail = cpDetail;
             }
 
-            const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
+            const statuses = ["走行中", "停車中", "運行準備中"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 
             if(!appData.trains) appData.trains = [];
@@ -946,9 +940,6 @@
                 if(t.status === "走行中") badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-700";
                 if(t.status === "停車中") badgeColor = "bg-sky-950 text-sky-300 border border-sky-700";
                 if(t.status === "運行準備中") badgeColor = "bg-amber-950 text-amber-300 border border-amber-700";
-                if(t.status === "運行前") badgeColor = "bg-purple-950 text-purple-300 border border-purple-700";
-                if(t.status === "運行終了") badgeColor = "bg-rose-950 text-rose-300 border border-rose-700";
-                if(t.status === "運行なし") badgeColor = "bg-slate-800 text-slate-500";
 
                 const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
                 let typeDisplay = t.type;
@@ -1121,51 +1112,61 @@
             checkEventDayStatus();
         }
 
-        /* --- シミュレーション制御スクリプト --- */
-        let isDetailView = false;
+        /* --- 走行位置スクリプト（全駅表示・上下分離・表示切り替え対応） --- */
+        function renderOperationTrack() {
+            const containerParent = document.getElementById('track-container-parent');
+            if(!containerParent) return;
 
-        function switchView() {
-            isDetailView = document.getElementById('toggleView').checked;
-            document.getElementById('modeIcon').style.display = isDetailView ? 'none' : 'block';
-            document.getElementById('modeDetail').style.display = isDetailView ? 'flex' : 'none';
-        }
+            const isDetail = document.getElementById('toggleView').checked;
+            const totalStations = allStationsMaster.length;
+            const containerHeight = Math.max(1200, totalStations * 35 + 80);
+            containerParent.style.height = `${containerHeight}px`;
 
-        function startSimulation() {
-            const train = document.getElementById('train');
-            const statusText = document.getElementById('statusText');
-            
-            train.style.display = 'block';
-            statusText.innerText = "運行準備中";
+            let html = `<div class="vertical-rail" style="height: ${containerHeight - 80}px;"></div>`;
 
-            setTimeout(() => {
-                train.style.left = '100px';
-                statusText.innerText = "停車中 (A駅)";
-            }, 3000);
+            // 各駅の配置（上から下へ等間隔）
+            const spacing = (containerHeight - 80) / (totalStations - 1);
+            allStationsMaster.forEach((st, idx) => {
+                const topPos = 40 + (idx * spacing);
+                html += `
+                    <div class="v-station-node" style="top: ${topPos}px;">
+                        <div class="v-station-dot"></div>
+                        <div class="v-station-label">${st.id}. ${st.name}</div>
+                    </div>
+                `;
+            });
 
-            setTimeout(() => {
-                statusText.innerText = "走行中 (A駅 → B駅)";
-                train.style.transition = "left 5s linear";
-                train.style.left = '350px';
-            }, 6000);
+            // 登録されている列車の配置
+            const trains = appData.trains || [];
+            trains.forEach((t, i) => {
+                // デモ用に、インデックスに応じて上り/下りを交互、または駅位置に配置
+                const isUp = (i % 2 === 0); // 偶数は上り（左）、奇数は下り（右）
+                const stIndex = (i * 4) % totalStations;
+                const topPos = 40 + (stIndex * spacing);
+                const destName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
 
-            setTimeout(() => {
-                statusText.innerText = "停車中 (B駅 - 30秒停車)";
-            }, 11000);
+                if(isDetail) {
+                    // 四角形表示（上に列車番号、中に種別・行き先・状態）
+                    html += `
+                        <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" title="列車番号: ${t.trainNum}">
+                            <div class="train-num-top">${t.trainNum}</div>
+                            <div class="train-card-v">
+                                <div class="font-bold">${t.type} ${destName}行</div>
+                                <div class="text-[9px] text-sky-200">${t.status}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // アイコン表示
+                    html += `
+                        <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" title="列車番号: ${t.trainNum}">
+                            <div class="train-icon-v">${t.type.charAt(0)}</div>
+                        </div>
+                    `;
+                }
+            });
 
-            setTimeout(() => {
-                statusText.innerText = "走行中 (B駅 → C駅)";
-                train.style.transition = "left 5s linear";
-                train.style.left = '600px';
-            }, 14000);
-
-            setTimeout(() => {
-                statusText.innerText = "停車中 (C駅 到着)";
-            }, 19000);
-
-            setTimeout(() => {
-                train.style.display = 'none';
-                statusText.innerText = "運行終了";
-            }, 22000);
+            containerParent.innerHTML = html;
         }
 
         window.onload = function() {
@@ -1176,6 +1177,7 @@
             initTimetableDropdowns();
             setInterval(updateLiveDateTime, 1000);
             updateLiveDateTime();
+            renderOperationTrack();
         };
     </script>
 </body>
