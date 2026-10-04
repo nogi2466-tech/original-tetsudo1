@@ -14,16 +14,16 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* 走行位置用スタイル（全駅縦方向配置・中央線） */
+        /* --- えれサイト風 走行位置スタイル --- */
         .track-container-vertical {
             position: relative;
             min-height: 1400px;
-            background: #1e293b;
-            border-radius: 8px;
+            background: #f1f5f9; /* 明るいライトグレーの背景 */
+            border-radius: 12px;
             padding: 40px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
             overflow: hidden;
-            border: 1px solid #334155;
+            border: 1px solid #cbd5e1;
             display: flex;
             justify-content: center;
         }
@@ -32,9 +32,10 @@
             top: 40px;
             bottom: 40px;
             left: 50%;
-            width: 4px;
-            background: #64748b;
+            width: 6px;
+            background: #db2777; /* えれサイト風の鮮やかな路線カラー（マゼンタピンク） */
             transform: translateX(-50%);
+            border-radius: 3px;
         }
         .v-station-node {
             position: absolute;
@@ -45,25 +46,40 @@
             width: 100%;
             pointer-events: none;
         }
+        /* えれサイト風の駅の横帯（うっすらとしたグレー背景） */
+        .v-station-bar {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            height: 32px;
+            background: rgba(226, 232, 240, 0.7);
+            border-radius: 4px;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
         .v-station-dot {
             position: absolute;
             left: 50%;
-            width: 12px;
-            height: 12px;
-            background: #94a3b8;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border: 4px solid #db2777;
             border-radius: 50%;
             transform: translateX(-50%);
-            z-index: 2;
+            z-index: 3;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
         .v-station-label {
             position: absolute;
-            left: calc(50% + 20px);
-            font-size: 0.8rem;
-            color: #cbd5e1;
+            right: calc(50% + 30px);
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #1e293b;
             white-space: nowrap;
+            z-index: 3;
         }
         
-        /* 列車配置スタイル（左右分離 ＆ 改良された見やすいアイコン） */
+        /* 列車配置スタイル（えれサイト風の前面アイコンバッジ） */
         .v-train {
             position: absolute;
             transform: translateY(-50%);
@@ -85,41 +101,57 @@
             text-align: left;
         }
 
-        /* 列車アイコンのブラッシュアップデザイン */
+        /* えれサイト風の列車アイコン・ヘッドマーク */
         .train-icon-badge {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: #334155;
             color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: bold;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            border: 1px solid #60a5fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 1px solid #475569;
             white-space: nowrap;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 4px;
         }
-        .train-icon-badge.type-特急 { background: linear-gradient(135deg, #ef4444, #991b1b); border-color: #fca5a5; }
-        .train-icon-badge.type-急行 { background: linear-gradient(135deg, #f97316, #c2410c); border-color: #fdba74; }
-        .train-icon-badge.type-快速 { background: linear-gradient(135deg, #eab308, #a16207); border-color: #fde047; color: #1e293b; }
-        .train-icon-badge.type-準急 { background: linear-gradient(135deg, #10b981, #047857); border-color: #6ee7b7; }
+        .train-op-num {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: monospace;
+            margin-bottom: 2px;
+            border: 1px solid #334155;
+        }
+        .train-type-tag {
+            font-size: 9px;
+            padding: 0 3px;
+            border-radius: 2px;
+        }
+        .type-特急 { background: #ef4444; color: white; }
+        .type-急行 { background: #f97316; color: white; }
+        .type-快速 { background: #eab308; color: #1e293b; }
+        .type-準急 { background: #10b981; color: white; }
+        .type-普通 { background: #64748b; color: white; }
 
         .train-card-v {
-            background: rgba(15, 23, 42, 0.9);
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
             border-radius: 6px;
             padding: 4px 8px;
             font-size: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            border: 1px solid #475569;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 1px solid #cbd5e1;
             backdrop-filter: blur(4px);
-            min-width: 100px;
+            min-width: 90px;
         }
         .train-num-top {
             font-size: 9px;
             font-weight: bold;
-            color: #93c5fd;
+            color: #2563eb;
             white-space: nowrap;
         }
     </style>
@@ -231,10 +263,10 @@
             </div>
         </div>
 
-        <!-- 3. 走行位置 -->
+        <!-- 3. 走行位置（えれサイト風） -->
         <div id="tab-operation" class="tab-content space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-xl font-bold text-indigo-200">列車走行位置（全駅表示・上下分離リアルタイム）</h2>
+                <h2 class="text-xl font-bold text-indigo-200">列車走行位置（えれサイト風リアルタイム）</h2>
                 <div class="flex items-center gap-3">
                     <button onclick="toggleAutoMove()" id="auto-move-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow">▶ 自動運行シミュレーション開始</button>
                 </div>
@@ -248,7 +280,7 @@
                     </label>
                 </div>
                 <div class="text-xs text-indigo-300">
-                    📍 中央線を境に <strong>左側：上り列車</strong> ／ <strong>右側：下り列車</strong> （クリックで詳細ポップアップ表示）
+                    📍 路線を挟み <strong>左側：上り列車</strong> ／ <strong>右側：下り列車</strong> （クリックで詳細ポップアップ）
                 </div>
             </div>
 
@@ -258,7 +290,7 @@
             </div>
 
             <div class="status-panel bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <p class="text-sm text-slate-300"><strong>運行状況モニタリング:</strong> <span id="statusText" class="text-indigo-300 font-bold">全線正常運行中（登録列車を自動配置）</span></p>
+                <p class="text-sm text-slate-300"><strong>運行状況モニタリング:</strong> <span id="statusText" class="text-indigo-300 font-bold">全線正常運行中（えれサイト風ビュー）</span></p>
                 <button onclick="renderOperationTrack()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs transition">位置を更新</button>
             </div>
         </div>
@@ -305,7 +337,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">運用番号</label>
-                            <input type="text" id="add-op-num" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="A01">
+                            <input type="text" id="add-op-num" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="73K">
                         </div>
                     </div>
 
@@ -314,14 +346,14 @@
                             <span class="text-[11px] text-indigo-300 font-bold block">【前方列車（本務列車）】番号</span>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" id="front-train-num" placeholder="列車番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="101M">
-                                <input type="text" id="front-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="A01">
+                                <input type="text" id="front-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="73K">
                             </div>
                         </div>
                         <div class="space-y-2 bg-slate-800/60 p-3 rounded border border-slate-700">
                             <span class="text-[11px] text-sky-300 font-bold block">【後方列車（増結・分割後）】番号</span>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" id="rear-train-num" placeholder="列車番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="103M">
-                                <input type="text" id="rear-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="A02">
+                                <input type="text" id="rear-op-num" placeholder="運用番号" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white" value="54K">
                             </div>
                         </div>
                     </div>
@@ -521,7 +553,7 @@
                     <span class="text-2xl">🚄</span>
                     <div>
                         <h3 id="modal-train-num" class="text-lg font-bold text-indigo-200">101M</h3>
-                        <p id="modal-op-num" class="text-xs text-slate-400 font-mono">運用: A01</p>
+                        <p id="modal-op-num" class="text-xs text-slate-400 font-mono">運用: 73K</p>
                     </div>
                 </div>
                 <button onclick="closeTrainModal()" class="text-slate-400 hover:text-white text-xl font-bold bg-slate-900 w-8 h-8 rounded-full flex items-center justify-center border border-slate-700">×</button>
@@ -653,9 +685,9 @@
 
         let appData = {
             trains: [
-                { id: 1, trainNum: "101M", opNum: "A01", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01", status: "走行中", currentIdx: 5 },
-                { id: 2, trainNum: "104M", opNum: "A02", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01", status: "走行中", currentIdx: 25 },
-                { id: 3, trainNum: "205M", opNum: "B03", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", consistNum: "S3-05", status: "停車中", currentIdx: 12 }
+                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01", status: "走行中", currentIdx: 5 },
+                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01", status: "走行中", currentIdx: 25 },
+                { id: 3, trainNum: "205M", opNum: "85K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", consistNum: "S3-05", status: "停車中", currentIdx: 12 }
             ],
             eventDates: ["2026-10-15"]
         };
@@ -674,8 +706,8 @@
                         appData = val;
                         if(!appData.trains || appData.trains.length === 0) {
                             appData.trains = [
-                                { id: 1, trainNum: "101M", opNum: "A01", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01", status: "走行中", currentIdx: 5 },
-                                { id: 2, trainNum: "104M", opNum: "A02", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01", status: "走行中", currentIdx: 25 }
+                                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", consistNum: "S100-01", status: "走行中", currentIdx: 5 },
+                                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", consistNum: "S2-01", status: "走行中", currentIdx: 25 }
                             ];
                         }
                         if(!appData.eventDates) appData.eventDates = ["2026-10-15"];
@@ -1169,14 +1201,14 @@
             checkEventDayStatus();
         }
 
-        /* --- 走行位置スクリプト（アイコンデザイン改良版） --- */
+        /* --- 走行位置スクリプト（えれサイト風デザインレンダリング） --- */
         function renderOperationTrack() {
             const containerParent = document.getElementById('track-container-parent');
             if(!containerParent) return;
 
             const isDetail = document.getElementById('toggleView').checked;
             const totalStations = allStationsMaster.length;
-            const containerHeight = Math.max(1400, totalStations * 36 + 100);
+            const containerHeight = Math.max(1400, totalStations * 40 + 100);
             containerParent.style.height = `${containerHeight}px`;
 
             let html = `<div class="vertical-rail" style="height: ${containerHeight - 80}px;"></div>`;
@@ -1186,6 +1218,7 @@
                 const topPos = 40 + (idx * spacing);
                 html += `
                     <div class="v-station-node" style="top: ${topPos}px;">
+                        <div class="v-station-bar"></div>
                         <div class="v-station-dot"></div>
                         <div class="v-station-label">${st.id}. ${st.name}</div>
                     </div>
@@ -1200,27 +1233,29 @@
                 const destName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
                 const currentStationName = allStationsMaster[t.currentIdx]?.name || '走行中';
                 const typeClass = `type-${t.type}`;
+                const opNum = t.opNum || '73K';
+                const consistShort = t.consistNum ? t.consistNum.split(' ')[0] : 'S100-01';
 
                 if(isDetail) {
                     html += `
                         <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
-                            <div class="train-icon-badge ${typeClass}">
-                                <span>${isUp ? '▲' : '▼'}</span>
-                                <span>${t.type}</span>
+                            <div class="train-icon-badge">
+                                <div class="train-op-num">${opNum}</div>
+                                <span class="train-type-tag ${typeClass}">${t.type}</span>
                             </div>
                             <div class="train-card-v">
-                                <div class="train-num-top">${t.trainNum} (${t.opNum || 'A01'})</div>
-                                <div class="font-bold text-slate-100">${destName}行</div>
-                                <div class="text-[9px] text-sky-300">📍 ${currentStationName}</div>
+                                <div class="train-num-top">${t.trainNum} <span class="text-slate-500 font-normal">(${consistShort})</span></div>
+                                <div class="font-bold text-slate-800">${destName}行</div>
+                                <div class="text-[9px] text-pink-600 font-semibold">📍 ${currentStationName}</div>
                             </div>
                         </div>
                     `;
                 } else {
                     html += `
                         <div class="v-train ${isUp ? 'up-train' : 'down-train'}" style="top: ${topPos}px;" onclick='openTrainModal(${JSON.stringify(t)})'>
-                            <div class="train-icon-badge ${typeClass}" title="${t.trainNum}: ${t.type} (${currentStationName})">
-                                <span>${isUp ? '▲' : '▼'}</span>
-                                <span>${t.trainNum}</span>
+                            <div class="train-icon-badge" title="${t.trainNum}: ${t.type} (${currentStationName})">
+                                <div class="train-op-num">${opNum}</div>
+                                <span class="train-type-tag ${typeClass}">${t.trainNum}</span>
                             </div>
                         </div>
                     `;
@@ -1237,9 +1272,9 @@
             const contentEl = document.getElementById('modal-content');
 
             numEl.innerText = `列車番号: ${train.trainNum}`;
-            opEl.innerText = `運用番号: ${train.opNum || 'A01'}`;
+            opEl.innerText = `運用番号: ${train.opNum || '73K'}`;
 
-            const destName = allStationsMaster.find(s => s.id === train.endSt)?.name || train.endSt;
+            const destName = allStationsMaster.find(s => s.id === train.endSt)?.name || train.endStr;
             const curStName = allStationsMaster[train.currentIdx || 0]?.name || '不明';
 
             contentEl.innerHTML = `
