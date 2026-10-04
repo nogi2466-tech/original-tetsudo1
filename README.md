@@ -29,7 +29,7 @@
 
         <div class="flex items-center gap-3">
             <div id="live-datetime" class="hidden sm:block bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-indigo-300">
-                2026/10/03(土) 00:00:00
+                2026/10/04(日) 00:00:00
             </div>
             <div id="event-banner-badge" class="hidden bg-rose-900 text-rose-200 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-700 animate-pulse">
                 🎉 イベント日ダイヤ
@@ -142,17 +142,17 @@
         <!-- 4. 列車情報 -->
         <div id="tab-traininfo" class="tab-content space-y-4">
             <h2 class="text-xl font-bold text-indigo-200">列車情報一覧</h2>
-            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-900 text-indigo-200 border-b border-slate-700">
                             <tr>
                                 <th class="p-3">列車番号</th>
-                                <th class="p-3">運用</th>
+                                <th class="p-3">運用番号</th>
                                 <th class="p-3">種別</th>
-                                <th class="p-3">運行日</th>
-                                <th class="p-3">区間</th>
-                                <th class="p-3">編成</th>
+                                <th class="p-3">行き先</th>
+                                <th class="p-3">両数</th>
+                                <th class="p-3">編成番号</th>
                                 <th class="p-3">状態</th>
                             </tr>
                         </thead>
@@ -241,7 +241,7 @@
                         <select id="add-start-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">終点駅</label>
+                        <label class="block text-xs text-slate-400 mb-1">終点駅（行き先）</label>
                         <select id="add-end-station" onchange="updateStationSchedulePreview()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                 </div>
@@ -327,7 +327,6 @@
 
         let currentActiveLine = 'main';
 
-        // モバイル用メニューのトグル（右端寄りにオーバーレイ表示）
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
             if (menu.classList.contains('hidden')) {
@@ -389,7 +388,7 @@
                 if(firebase.apps.length === 0) {
                     firebase.initializeApp({ databaseURL: DEFAULT_FB_URL });
                 }
-                dbRef = firebase.database().ref('shinomori_railway_v7');
+                dbRef = firebase.database().ref('shinomori_railway_v8');
                 dbRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if(val) {
@@ -498,14 +497,15 @@
             const opNum = document.getElementById('add-op-num').value;
             const type = document.getElementById('add-train-type').value;
             const runDay = document.getElementById('add-run-day').value;
-            const cars = document.getElementById('add-cars-count').value;
+            const carsCount = document.getElementById('add-cars-count').value;
             const line = document.getElementById('add-train-line').value;
             const startSt = document.getElementById('add-start-station').value;
             const endSt = document.getElementById('add-end-station').value;
             const series = document.getElementById('consist-series').value;
-            const consistNum = document.getElementById('consist-number-sel').value;
+            const consistNumFull = document.getElementById('consist-number-sel').value;
             
-            const carsStr = cars + ` (${series} ${consistNum})`;
+            const consistNumOnly = consistNumFull ? consistNumFull.split(' ')[0] : series;
+
             const statuses = ["運行前", "運行準備中", "走行中", "停車中", "運行終了", "運行なし"];
             const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 
@@ -519,7 +519,8 @@
                 line,
                 startSt,
                 endSt,
-                cars: carsStr,
+                cars: carsCount,
+                consistNum: consistNumOnly,
                 status: randomStatus,
                 stationId: startSt
             });
@@ -530,6 +531,7 @@
             switchTab('traininfo');
         }
 
+        // 列車情報一覧のレンダリング（列車番号、運用番号、種別、行き先、両数、編成番号、状態）
         function renderTrainInfoTable() {
             const tbody = document.getElementById('train-info-tbody');
             if(!tbody) return;
@@ -549,18 +551,23 @@
                 if(t.status === "運行終了") badgeColor = "bg-rose-950 text-rose-300 border border-rose-700";
                 if(t.status === "運行なし") badgeColor = "bg-slate-800 text-slate-500";
 
-                const startName = allStationsMaster.find(s => s.id === t.startSt)?.name || t.startSt;
                 const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
-                const dayLabel = t.runDay === 'weekday' ? '平日' : t.runDay === 'holiday' ? '土休日' : t.runDay === 'event' ? 'イベント日' : '年末年始';
+                let carsVal = t.cars || "10両";
+                let consistVal = t.consistNum || "-";
+                if(carsVal.includes("(") && !t.consistNum) {
+                    const parts = carsVal.split('(');
+                    carsVal = parts[0].trim();
+                    consistVal = parts[1] ? parts[1].replace(')', '').trim() : '-';
+                }
 
                 return `
                     <tr class="hover:bg-slate-750 transition">
                         <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
                         <td class="p-3 font-mono">${t.opNum}</td>
                         <td class="p-3">${t.type}</td>
-                        <td class="p-3"><span class="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 text-[10px]">${dayLabel}</span></td>
-                        <td class="p-3">${startName} → ${endName}</td>
-                        <td class="p-3">${t.cars}</td>
+                        <td class="p-3 font-bold text-slate-200">${endName} 行</td>
+                        <td class="p-3">${carsVal}</td>
+                        <td class="p-3 font-mono text-indigo-400">${consistVal}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.status}</span></td>
                     </tr>
                 `;
@@ -576,7 +583,8 @@
                     <h3 class="font-bold text-indigo-300 text-sm border-b border-slate-700 pb-1">${group.series} 運用割当表</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                         ${group.items.map(item => {
-                            const assigned = (appData.trains || []).filter(t => t.cars.includes(item.split(' ')[0]));
+                            const code = item.split(' ')[0];
+                            const assigned = (appData.trains || []).filter(t => (t.consistNum && t.consistNum.includes(code)) || (t.cars && t.cars.includes(code)));
                             const opText = assigned.length > 0 ? assigned.map(a => `${a.opNum}(${a.trainNum})`).join(', ') : '予備・非稼働';
                             return `
                                 <div class="bg-slate-900 p-2.5 rounded border border-slate-700 flex justify-between items-center">
@@ -590,7 +598,6 @@
             `).join('');
         }
 
-        // 紙の時刻表風ダイヤ表（左に駅名、上に列車番号・種別、交点に発車時間）
         function renderMatrixTimetable() {
             const container = document.getElementById('matrix-timetable-container');
             if(!container) return;
