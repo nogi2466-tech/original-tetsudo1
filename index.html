@@ -14,6 +14,22 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* スマホメニューを画面上部にすっきりとオーバーレイ表示 */
+        #nav-menu.mobile-open {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            gap: 6px;
+        }
+
         /* --- えれサイト風 走行位置スタイル --- */
         .track-container-vertical {
             position: relative;
@@ -88,7 +104,6 @@
             align-items: center;
             gap: 6px;
         }
-        /* 線を挟み：左側が上り、右側が下り */
         .v-train.up-train {
             right: calc(50% + 25px);
             flex-direction: row-reverse;
@@ -166,7 +181,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 relative">
             <div id="live-datetime" class="hidden sm:block bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-indigo-300">
                 2026/10/04(日) 00:00:00
             </div>
@@ -177,25 +192,26 @@
                 <span id="sync-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="sync-status-text">同期待機中</span>
             </div>
+            <!-- 3本線メニューボタン -->
             <button onclick="toggleMenu()" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 p-2 rounded-lg text-white md:hidden transition flex items-center justify-center w-10 h-10 shadow">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
+
+            <!-- スマホ用オーバーレイメニュー（画面上部に綺麗に展開） -->
+            <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 md:space-x-1 sticky top-0 z-40 backdrop-blur shadow-md">
+                <button onclick="switchTab('about')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition bg-indigo-600 text-white shadow text-left md:text-center" data-tab="about">会社について</button>
+                <button onclick="switchTab('timetable')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="timetable">時刻表</button>
+                <button onclick="switchTab('operation')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="operation">走行位置</button>
+                <button onclick="switchTab('traininfo')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="traininfo">列車情報</button>
+                <button onclick="switchTab('addtrain')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="addtrain">列車追加</button>
+                <button onclick="switchTab('consist')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="consist">編成表</button>
+                <button onclick="switchTab('dia')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="dia">ダイヤ表</button>
+                <button onclick="switchTab('settings')" class="tab-btn px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800 text-left md:text-center" data-tab="settings">設定</button>
+            </nav>
         </div>
     </header>
-
-    <!-- ナビゲーションタブ -->
-    <nav id="nav-menu" class="hidden md:flex bg-slate-900/95 border-b border-slate-800 px-4 py-2 overflow-x-auto space-x-1 sticky top-0 z-40 backdrop-blur shadow-md">
-        <button onclick="switchTab('about')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white shadow" data-tab="about">会社について</button>
-        <button onclick="switchTab('timetable')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="timetable">時刻表</button>
-        <button onclick="switchTab('operation')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="operation">走行位置</button>
-        <button onclick="switchTab('traininfo')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="traininfo">列車情報</button>
-        <button onclick="switchTab('addtrain')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="addtrain">列車追加</button>
-        <button onclick="switchTab('consist')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="consist">編成表</button>
-        <button onclick="switchTab('dia')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="dia">ダイヤ表</button>
-        <button onclick="switchTab('settings')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="settings">設定</button>
-    </nav>
 
     <!-- メインコンテンツ -->
     <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full relative z-10">
@@ -212,19 +228,19 @@
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
                     <h3 class="text-indigo-400 font-bold border-b border-slate-700 pb-2">企業概要</h3>
                     <ul class="text-sm text-slate-300 space-y-2">
-                        <li><span class="text-slate-400 inline-block w-28">社名</span> 紫句守鉄道株式会社[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">設立</span> 1965年4月1日[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">本社所在地</span> 陽光県紫句守市中央一丁目1番地[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">社名</span> 紫句守鉄道株式会社</li>
+                        <li><span class="text-slate-400 inline-block w-28">設立</span> 1965年4月1日</li>
+                        <li><span class="text-slate-400 inline-block w-28">本社所在地</span> 陽光県紫句守市中央一丁目1番地</li>
                     </ul>
                 </div>
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
                     <h3 class="text-indigo-400 font-bold border-b border-slate-700 pb-2">路線データ</h3>
                     <ul class="text-sm text-slate-300 space-y-2">
-                        <li><span class="text-slate-400 inline-block w-28">紫雲本線</span> 駅ID: 1～30[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">星句高原線</span> 駅ID: 31～40[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">句守支線</span> 駅ID: 41～55[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">紫霞観光線</span> 駅ID: 56～60[cite: 1]</li>
-                        <li><span class="text-slate-400 inline-block w-28">直通路線</span> 駅ID: 09～1[cite: 1]</li>
+                        <li><span class="text-slate-400 inline-block w-28">紫雲本線</span> 駅ID: 1～30</li>
+                        <li><span class="text-slate-400 inline-block w-28">星句高原線</span> 駅ID: 31～40</li>
+                        <li><span class="text-slate-400 inline-block w-28">句守支線</span> 駅ID: 41～55</li>
+                        <li><span class="text-slate-400 inline-block w-28">紫霞観光線</span> 駅ID: 56～60</li>
+                        <li><span class="text-slate-400 inline-block w-28">直通路線</span> 駅ID: 09～1</li>
                     </ul>
                 </div>
             </div>
@@ -390,15 +406,53 @@
                     </div>
                 </div>
 
-                <!-- 発着時間入力フィールド -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-indigo-300 mb-1 font-bold">始発駅 発車時刻</label>
-                        <input type="time" id="add-dep-time" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="08:00">
+                <!-- 連結・切り離し・種別変更 設定エリア -->
+                <div class="border border-indigo-700/60 p-4 rounded-lg bg-indigo-950/40 space-y-3">
+                    <span class="text-xs text-indigo-300 font-bold block">🔗 運用上の特殊イベント設定（連結・切り離し・種別変更）</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <label class="flex items-center space-x-2 bg-slate-900 p-2.5 rounded border border-slate-700 cursor-pointer">
+                            <input type="checkbox" id="check-coupling" class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-slate-200">途中で他列車と連結する</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-900 p-2.5 rounded border border-slate-700 cursor-pointer">
+                            <input type="checkbox" id="check-decoupling" class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-slate-200">途中で切り離しを行う</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-900 p-2.5 rounded border border-slate-700 cursor-pointer">
+                            <input type="checkbox" id="check-changetype" onchange="toggleTypeChangeBox()" class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-slate-200">途中で種別を変更する</span>
+                        </label>
                     </div>
-                    <div>
-                        <label class="block text-xs text-indigo-300 mb-1 font-bold">終着駅 到着時刻</label>
-                        <input type="time" id="add-arr-time" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="09:30">
+                    <div id="box-type-change" class="hidden pt-2">
+                        <label class="block text-[11px] text-slate-400 mb-1">変更後の種別</label>
+                        <select id="add-changed-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white">
+                            <option value="普通">普通</option>
+                            <option value="準急">準急</option>
+                            <option value="快速">快速</option>
+                            <option value="急行">急行</option>
+                            <option value="特急">特急</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 各停車駅の到着・発車時間設定エリア -->
+                <div class="border border-slate-700 p-4 rounded-lg bg-slate-900 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-indigo-300 font-bold">🚉 各停車駅の到着・発車時間スケジュール入力</span>
+                        <button type="button" onclick="generateStationTimes()" class="bg-slate-800 hover:bg-slate-700 text-indigo-200 px-3 py-1 rounded text-xs border border-slate-600 transition">簡易自動生成</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">始発駅 発車時刻</label>
+                            <input type="time" id="add-dep-time" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="08:00">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">終着駅 到着時刻</label>
+                            <input type="time" id="add-arr-time" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white" value="09:30">
+                        </div>
+                    </div>
+                    <div id="station-schedule-list" class="space-y-2 max-h-48 overflow-y-auto pr-2 pt-2 border-t border-slate-800">
+                        <!-- 動的に各駅の時刻入力欄が展開されます -->
                     </div>
                 </div>
 
@@ -436,11 +490,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-xs text-indigo-300 font-bold">始点駅設定</label>
-                        <select id="add-start-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        <select id="add-start-station" onchange="renderStationScheduleInputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-xs text-indigo-300 font-bold">終点駅（行き先）設定</label>
-                        <select id="add-end-station" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
+                        <select id="add-end-station" onchange="renderStationScheduleInputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white"></select>
                     </div>
                 </div>
 
@@ -539,10 +593,11 @@
             { series: "S900系", items: ["S900-01 (事業用4両)", "S900-02 (事業用4両)"] }
         ];
 
+        /* スマホ向けメニューの展開・折りたたみ */
         function toggleMenu() {
             const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('mobile-open');
             menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
         }
 
         function switchTab(tabId) {
@@ -558,20 +613,29 @@
                 targetBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
             }
 
+            // スマホメニューが開いていたらタブ切り替え時に閉じる
+            const menu = document.getElementById('nav-menu');
+            if(menu.classList.contains('mobile-open')) {
+                menu.classList.remove('mobile-open');
+                menu.classList.add('hidden');
+            }
+
             if (tabId === 'dia') renderMatrixTimetable();
             if (tabId === 'timetable') initTimetableDropdowns();
             if (tabId === 'traininfo') renderTrainInfoTable();
             if (tabId === 'consist') renderConsistMatrix();
             if (tabId === 'settings') renderEventDatesList();
             if (tabId === 'operation') renderOperationTrack();
-            if (tabId === 'addtrain') updateAddStationDropdowns();
+            if (tabId === 'addtrain') {
+                updateAddStationDropdowns();
+                renderStationScheduleInputs();
+            }
         }
 
         let appData = {
             trains: [
-                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", depTime: "06:00", arrTime: "23:59", consistNum: "S100-01 (10両)", status: "走行中" },
-                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", depTime: "06:00", arrTime: "23:59", consistNum: "S2-01 (10両)", status: "走行中" },
-                { id: 3, trainNum: "205M", opNum: "73K", type: "普通", runDay: "weekday", startSt: "09", endSt: "40", depTime: "06:00", arrTime: "23:59", consistNum: "S3-05 (8両)", status: "停車中" }
+                { id: 1, trainNum: "101M", opNum: "73K", type: "特急", runDay: "weekday", startSt: "1", endSt: "30", depTime: "06:00", arrTime: "23:59", consistNum: "S100-01 (10両)", status: "走行中", schedule: {} },
+                { id: 2, trainNum: "104M", opNum: "54K", type: "快速", runDay: "weekday", startSt: "30", endSt: "1", depTime: "06:00", arrTime: "23:59", consistNum: "S2-01 (10両)", status: "走行中", schedule: {} }
             ],
             eventDates: ["2026-10-15"]
         };
@@ -634,6 +698,11 @@
             document.getElementById('consist-2-container').classList.toggle('hidden', mode !== 'double');
         }
 
+        function toggleTypeChangeBox() {
+            const enabled = document.getElementById('check-changetype').checked;
+            document.getElementById('box-type-change').classList.toggle('hidden', !enabled);
+        }
+
         function updateConsistNumbers(num) {
             const series = document.getElementById(`consist-series-${num}`).value;
             const sel = document.getElementById(`consist-number-${num}`);
@@ -641,6 +710,56 @@
             if(found) {
                 sel.innerHTML = found.items.map(it => `<option>${it}</option>`).join('');
             }
+        }
+
+        function renderStationScheduleInputs() {
+            const startId = document.getElementById('add-start-station').value;
+            const endId = document.getElementById('add-end-station').value;
+            const container = document.getElementById('station-schedule-list');
+            if(!container) return;
+
+            let sIdx = allStationsMaster.findIndex(s => s.id === startId);
+            let eIdx = allStationsMaster.findIndex(s => s.id === endId);
+            if(sIdx === -1) sIdx = 0;
+            if(eIdx === -1) eIdx = allStationsMaster.length - 1;
+            if(sIdx > eIdx) { let tmp = sIdx; sIdx = eIdx; eIdx = tmp; }
+
+            let html = '';
+            for(let i = sIdx; i <= eIdx; i++) {
+                const st = allStationsMaster[i];
+                html += `
+                    <div class="flex items-center justify-between bg-slate-800 p-2 rounded border border-slate-700 text-xs gap-2 st-sched-row" data-stid="${st.id}">
+                        <span class="font-bold text-indigo-200 w-32 truncate">${st.id}. ${st.name}</span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-slate-400 text-[10px]">着</span>
+                            <input type="time" class="st-arr bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs font-mono" value="08:00">
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-slate-400 text-[10px]">発</span>
+                            <input type="time" class="st-dep bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs font-mono" value="08:01">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function generateStationTimes() {
+            const rows = document.querySelectorAll('.st-sched-row');
+            const baseDep = document.getElementById('add-dep-time').value || "08:00";
+            let [h, m] = baseDep.split(':').map(Number);
+
+            rows.forEach((row, idx) => {
+                let totalMin = h * 60 + m + (idx * 3);
+                let th = String(Math.floor(totalMin / 60) % 24).padStart(2, '0');
+                let tm = String(totalMin % 60).padStart(2, '0');
+                let timeStr = `${th}:${tm}`;
+
+                const arrInput = row.querySelector('.st-arr');
+                const depInput = row.querySelector('.st-dep');
+                if(arrInput) arrInput.value = timeStr;
+                if(depInput) depInput.value = timeStr;
+            });
         }
 
         function addNewTrain() {
@@ -660,6 +779,21 @@
             const depTime = document.getElementById('add-dep-time').value || "08:00";
             const arrTime = document.getElementById('add-arr-time').value || "09:30";
             
+            // 各種チェックボックスの状態取得
+            const isCoupling = document.getElementById('check-coupling').checked;
+            const isDecoupling = document.getElementById('check-decoupling').checked;
+            const isChangeType = document.getElementById('check-changetype').checked;
+            const changedType = isChangeType ? document.getElementById('add-changed-type').value : null;
+
+            // 各駅スケジュールデータの収集
+            let schedule = {};
+            document.querySelectorAll('.st-sched-row').forEach(row => {
+                const stId = row.getAttribute('data-stid');
+                const arr = row.querySelector('.st-arr').value;
+                const dep = row.querySelector('.st-dep').value;
+                schedule[stId] = { arr, dep };
+            });
+
             const consistMode = document.getElementById('consist-mode').value;
             const c1Full = document.getElementById('consist-number-1').value;
             let consistStr = c1Full || 'S100-01 (10両)';
@@ -681,7 +815,12 @@
                 depTime,
                 arrTime,
                 consistNum: consistStr,
-                status: "走行中"
+                status: "走行中",
+                isCoupling,
+                isDecoupling,
+                isChangeType,
+                changedType,
+                schedule
             });
 
             pushData();
@@ -709,7 +848,7 @@
                             <tr>
                                 <th class="p-3">列車番号</th>
                                 <th class="p-3">運用番号</th>
-                                <th class="p-3">種別・区間ルール</th>
+                                <th class="p-3">種別・特殊設定</th>
                                 <th class="p-3">行き先</th>
                                 <th class="p-3">運行時間</th>
                                 <th class="p-3">両数・編成番号</th>
@@ -723,11 +862,16 @@
                     if(t.status === "停車中") badgeColor = "bg-sky-950 text-sky-300 border border-sky-700";
                     const endName = allStationsMaster.find(s => s.id === t.endSt)?.name || t.endSt;
 
+                    let tags = `<span class="px-1.5 py-0.5 rounded bg-slate-700 text-slate-200">${t.type}</span>`;
+                    if(t.isCoupling) tags += ` <span class="text-[10px] text-amber-300 bg-amber-950 px-1 rounded border border-amber-800">連結</span>`;
+                    if(t.isDecoupling) tags += ` <span class="text-[10px] text-rose-300 bg-rose-950 px-1 rounded border border-rose-800">切離</span>`;
+                    if(t.isChangeType) tags += ` <span class="text-[10px] text-sky-300 bg-sky-950 px-1 rounded border border-sky-800">種別変更(${t.changedType})</span>`;
+
                     html += `
                         <tr class="hover:bg-slate-750 transition">
                             <td class="p-3 font-bold text-indigo-300">${t.trainNum}</td>
                             <td class="p-3 font-mono">${t.opNum}</td>
-                            <td class="p-3">${t.type}</td>
+                            <td class="p-3">${tags}</td>
                             <td class="p-3 font-bold text-slate-200">${endName} 行</td>
                             <td class="p-3 font-mono text-indigo-300">${t.depTime || '08:00'}発 〜 ${t.arrTime || '09:30'}着</td>
                             <td class="p-3 font-mono text-indigo-400">${t.consistNum || '-'}</td>
@@ -775,12 +919,17 @@
                         const startName = allStationsMaster.find(s => s.id === t.startSt)?.name || t.startSt;
                         const typeClass = `type-${t.type}`;
 
+                        let tags = `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${typeClass}">${t.type}</span>`;
+                        if(t.isCoupling) tags += ` <span class="text-[9px] text-amber-300 bg-amber-950 px-1 rounded border border-amber-800">連結</span>`;
+                        if(t.isDecoupling) tags += ` <span class="text-[9px] text-rose-300 bg-rose-950 px-1 rounded border border-rose-800">切離</span>`;
+                        if(t.isChangeType) tags += ` <span class="text-[9px] text-sky-300 bg-sky-950 px-1 rounded border border-sky-800">変(${t.changedType})</span>`;
+
                         html += `
                             <div class="flex flex-wrap items-center justify-between bg-slate-900/70 p-2 rounded border border-slate-700/80 gap-2">
                                 <div class="flex items-center space-x-3">
                                     <span class="text-xs font-mono text-slate-400">#${idx + 1}</span>
                                     <span class="font-bold text-indigo-300 font-mono text-sm">${t.trainNum}</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${typeClass}">${t.type}</span>
+                                    ${tags}
                                     <span class="font-mono text-indigo-300 text-[11px]">${t.depTime || '08:00'}発 〜 ${t.arrTime || '09:30'}着</span>
                                 </div>
                                 <div class="text-slate-200 font-medium">
@@ -853,7 +1002,15 @@
             allStationsMaster.forEach(st => {
                 html += `<tr class="hover:bg-slate-750"><td class="py-1.5 px-3 border-r border-slate-700 text-left font-medium sticky left-0 bg-slate-800 z-10 whitespace-nowrap text-xs w-36 overflow-hidden text-ellipsis">${st.id}. ${st.name}</td>`;
                 trains.forEach(t => {
-                    html += `<td class="py-1.5 px-2 border-r border-slate-800 font-mono text-slate-300 text-[11px]">${t.depTime || '08:10'}</td>`;
+                    let timeVal = '-';
+                    if(t.schedule && t.schedule[st.id]) {
+                        timeVal = t.schedule[st.id].dep || t.schedule[st.id].arr || '-';
+                    } else if(st.id === t.startSt) {
+                        timeVal = t.depTime;
+                    } else if(st.id === t.endSt) {
+                        timeVal = t.arrTime;
+                    }
+                    html += `<td class="py-1.5 px-2 border-r border-slate-800 font-mono text-slate-300 text-[11px]">${timeVal}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -945,13 +1102,11 @@
             if(el) el.innerText = `${yyyy}/${mm}/${dd}(${dayOfWeek}) ${hours}:${minutes}:${seconds}`;
             checkEventDayStatus();
 
-            // 走行位置タブが表示されている場合は、リアルタイムの時刻進行に合わせて位置を自動更新
             if(document.getElementById('tab-operation').classList.contains('active')) {
                 renderOperationTrack();
             }
         }
 
-        // 時刻文字列（"08:30"など）を分単位に変換するヘルパー
         function timeToMinutes(timeStr) {
             if (!timeStr || !timeStr.includes(':')) return 0;
             const parts = timeStr.split(':');
@@ -1011,18 +1166,16 @@
 
             const trains = appData.trains || [];
             const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60; // 秒単位までスムーズに計算
+            const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
             trains.forEach((t, i) => {
-                // 1. 発着時間による表示・非表示判定
                 if (t.depTime && t.arrTime) {
                     const depMin = timeToMinutes(t.depTime);
                     const arrMin = timeToMinutes(t.arrTime);
                     if (currentMinutes < depMin || currentMinutes > arrMin) {
-                        return; // 運行時間外のため非表示
+                        return;
                     }
 
-                    // 2. 運行時間内であれば、経過割合に応じて駅間を自動で移動させる
                     const totalDuration = Math.max(1, arrMin - depMin);
                     const elapsed = currentMinutes - depMin;
                     const progressRate = Math.max(0, Math.min(1, elapsed / totalDuration));
@@ -1032,7 +1185,6 @@
                     if(sIdx === -1) sIdx = 0;
                     if(eIdx === -1) eIdx = allStationsMaster.length - 1;
 
-                    // 路線上のインデックス進行位置を算出
                     const stationCountSpan = Math.abs(eIdx - sIdx);
                     const calculatedStationPosIdx = sIdx + (eIdx > sIdx ? progressRate * stationCountSpan : -progressRate * stationCountSpan);
                     t._realtimeStationIdx = calculatedStationPosIdx;
@@ -1040,7 +1192,6 @@
                     t._realtimeStationIdx = 0;
                 }
 
-                // 現在位置の駅オブジェクトを取得
                 const floorIdx = Math.floor(t._realtimeStationIdx);
                 const currentStObj = allStationsMaster[floorIdx] || allStationsMaster[0];
 
@@ -1053,7 +1204,6 @@
                 }
 
                 if(t.filteredIdx === -1) t.filteredIdx = 0;
-                // 小数点以下の進捗を反映して駅間を滑らかに移動
                 const decimalPart = t._realtimeStationIdx - floorIdx;
                 const topPos = 40 + ((t.filteredIdx + decimalPart) * spacing);
 
@@ -1114,8 +1264,10 @@
             const curStName = allStationsMaster[Math.floor(train._realtimeStationIdx || 0)]?.name || '不明';
             const startStName = allStationsMaster.find(s => s.id === train.startSt)?.name || train.startSt;
 
-            const stopsLists = officialStopsMaster[train.type] || officialStopsMaster["普通"];
-            const stopIds = stopsLists[0];
+            let specialInfo = '';
+            if(train.isCoupling) specialInfo += `<span class="text-amber-300 font-bold">・途中駅で他列車と連結あり</span><br>`;
+            if(train.isDecoupling) specialInfo += `<span class="text-rose-300 font-bold">・途中駅で切り離しあり</span><br>`;
+            if(train.isChangeType) specialInfo += `<span class="text-sky-300 font-bold">・途中駅から「${train.changedType}」へ種別変更</span><br>`;
 
             let stopsHtml = `
                 <div class="mt-3 border-t border-slate-700 pt-3">
@@ -1137,11 +1289,20 @@
 
             for(let i = sIdx; i <= eIdx; i++) {
                 const st = allStationsMaster[i];
-                const isStop = stopIds.includes(st.id) || i === sIdx || i === eIdx;
-                if(!isStop) continue;
+                let arrTime = '-';
+                let depTime = '-';
 
-                let arrTime = i === sIdx ? '-' : `08:${String(10 + i * 2).padStart(2,'0')}`;
-                let depTime = i === eIdx ? '-' : `08:${String(12 + i * 2).padStart(2,'0')}`;
+                if(train.schedule && train.schedule[st.id]) {
+                    arrTime = train.schedule[st.id].arr || '-';
+                    depTime = train.schedule[st.id].dep || '-';
+                } else if(i === sIdx) {
+                    depTime = train.depTime;
+                } else if(i === eIdx) {
+                    arrTime = train.arrTime;
+                } else {
+                    arrTime = `08:${String(10 + i * 2).padStart(2,'0')}`;
+                    depTime = `08:${String(12 + i * 2).padStart(2,'0')}`;
+                }
 
                 stopsHtml += `
                     <tr class="border-b border-slate-800/50 hover:bg-slate-800">
@@ -1161,7 +1322,7 @@
                     <div class="flex justify-between"><span class="text-slate-400">種別:</span> <span class="font-bold text-emerald-300">${train.type}</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">区間:</span> <span class="text-slate-200">${startStName}発 〜 ${destName}行</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">運行時間:</span> <span class="font-mono text-indigo-300">${train.depTime || '08:00'}発 〜 ${train.arrTime || '09:30'}着</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">両数:</span> <span class="font-mono text-indigo-200">${train.consistNum ? train.consistNum.split(' ')[1] || '10両' : '10両'}</span></div>
+                    ${specialInfo ? `<div class="pt-1 border-t border-slate-800">${specialInfo}</div>` : ''}
                     <div class="flex justify-between"><span class="text-slate-400">現在の状態:</span> <span class="font-bold text-amber-300">${train.status} (📍 ${curStName}付近)</span></div>
                 </div>
                 ${stopsHtml}
@@ -1176,10 +1337,11 @@
         window.onload = function() {
             initFirebase();
             updateAddStationDropdowns();
+            renderStationScheduleInputs();
             updateConsistNumbers(1);
             updateConsistNumbers(2);
             initTimetableDropdowns();
-            setInterval(updateLiveDateTime, 1000); // 1秒ごとに時刻と走行位置を自動更新
+            setInterval(updateLiveDateTime, 1000);
             updateLiveDateTime();
             renderOperationTrack();
         };
